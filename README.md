@@ -196,7 +196,7 @@ easy to fork and contribute any changes back upstream.
     $ echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
     $ echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
     ```
-    - **Zsh note**: Modify your `~/.zshenv` file instead of `~/.bash_profile`.
+    - **Zsh note**: Modify your `~/.zshrc` file instead of `~/.bash_profile`.
     - **Ubuntu and Fedora note**: Modify your `~/.bashrc` file instead of `~/.bash_profile`.
     - **Proxy note**: If you use a proxy, export `http_proxy` and `HTTPS_PROXY` too.
 
@@ -206,7 +206,7 @@ easy to fork and contribute any changes back upstream.
     ```sh
     $ echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
     ```
-    - **Zsh note**: Modify your `~/.zshenv` file instead of `~/.bash_profile`.
+    - **Zsh note**: Modify your `~/.zshrc` file instead of `~/.bash_profile`.
     - **fish note**: Use `pyenv init - | source` instead of `eval (pyenv init -)`.
     - **Ubuntu and Fedora note**: Modify your `~/.bashrc` file instead of `~/.bash_profile`.
 
@@ -299,6 +299,8 @@ package manager for macOS.
 
 To upgrade pyenv in the future, use `upgrade` instead of `install`.
 
+#### Post-installation
+
 Then follow the rest of the post-installation steps under [Basic GitHub Checkout](https://github.com/pyenv/pyenv#basic-github-checkout) above, starting with #3 ("Add `pyenv init` to your shell to enable shims and autocompletion").
 
 ### Advanced Configuration
@@ -377,7 +379,7 @@ The pyenv source code is [hosted on
 GitHub](https://github.com/pyenv/pyenv).  It's clean, modular,
 and easy to understand, even if you're not a shell hacker.
 
-Tests are executed using [Bats](https://github.com/sstephenson/bats):
+Tests are executed using [Bats](https://github.com/bats-core/bats-core):
 
     $ bats test
     $ bats/test/<file>.bats
