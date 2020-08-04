@@ -1,5 +1,22 @@
 ## Version History
 
+## 1.2.20
+
+* python-build: Add CPython 3.8.5 (#1667)
+* python-build: Add CPython 3.8.4 (#1658)
+* python-build: Add CPython 3.7.8
+* python-build: Add CPython 3.6.11
+* pyenv-install: Make grep detection more robust (#1663)
+* python-build: Fix has_tar_xz_support function on FreeBSD. (#1652)
+
+## 1.2.19
+
+* python-build: Add CPython 3.8.3 (#1612)
+* python-build: Add CPython 2.7.18 (#1593)
+* python-build: Add CPython 3.10-dev (#1619)
+* python-build: Add anaconda3-2020.02 (#1584)
+* python-build: Add stackless 3.7.5 (#1589)
+
 ## 1.2.18
 
 * python-build: Update download URLs for old OpenSSL releases (#1578)
