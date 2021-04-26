@@ -4,3 +4,6 @@
 [submodule "plugins/pyenv-pip-migrate"]
 	path = plugins/pyenv-pip-migrate
 	url = https://github.com/pyenv/pyenv-pip-migrate.git
+[submodule "plugins/pyenv-virtualenv-migrate"]
+	path = plugins/pyenv-virtualenv-migrate
+	url = https://github.com/ashwinvis/pyenv-virtualenv-migrate.git
