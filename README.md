@@ -135,7 +135,8 @@ global system 3.3.6 3.2 2.5`. At this point, one should be able to find the full
 executable path to each of these using `pyenv which`, e.g. `pyenv which python2.5`
 (should display `$(pyenv root)/versions/2.5/bin/python2.5`), or `pyenv which
 python3.4` (should display path to system Python3). You can also specify multiple
-versions in a `.python-version` file, separated by newlines or any whitespace.
+versions in a `.python-version` file, separated by newlines.
+Lines starting with a `#` are ignored.
 
 ### Locating the Python Installation
 
@@ -207,28 +208,18 @@ easy to fork and contribute any changes back upstream.
    pyenv repo is cloned and add `$PYENV_ROOT/bin` to your `$PATH` for access
    to the `pyenv` command-line utility.
 
-   - For **bash**:
+   - For **bash**/**Zsh**:
      ~~~ bash
-     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
-     echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
-     ~~~
-
-   - For **Ubuntu Desktop**:
-     ~~~ bash
-     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-     echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-     ~~~
-
-   - For **Zsh**:
-     ~~~ zsh
-     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-     echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.profile
+     echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.profile
+     echo 'eval "$(pyenv init --path)"' >> ~/.profile
      ~~~
 
    - For **Fish shell**:
      ~~~ fish
      set -Ux PYENV_ROOT $HOME/.pyenv
      set -Ux fish_user_paths $PYENV_ROOT/bin $fish_user_paths
+     pyenv init --path | source
      ~~~
 
    - **Proxy note**: If you use a proxy, export `http_proxy` and `https_proxy` too.
@@ -238,11 +229,6 @@ easy to fork and contribute any changes back upstream.
    configuration file since it manipulates `PATH` during the initialization.
 
    - For **bash**:
-     ~~~ bash
-     echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
-     ~~~
-
-   - For **Ubuntu Desktop** and **Fedora**:
      ~~~ bash
      echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
      ~~~
