@@ -6,4 +6,4 @@ if [ $# -eq 0 ]; then
 fi
 
 cd "$1"
-pyenv exec "${@:2}"
+"${PYENV_ROOT:-$HOME/.pyenv}/bin/pyenv" exec "${@:2}"
