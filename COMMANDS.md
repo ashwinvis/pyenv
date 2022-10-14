@@ -228,11 +228,19 @@ Then install the desired versions:
       2.6.8
     * 2.7.6 (set by /home/yyuu/.pyenv/version)
 
+To install the latest version of Python without giving a specific version use the `:latest` syntax. For example, to install the latest patch version for Python 3.8 you could do:
+
+    pyenv install 3.8:latest
+
+To install the latest major release for Python 3 try:
+
+    pyenv install 3:latest
+
 ## `pyenv uninstall`
 
-Uninstall a specific Python version.
+Uninstall Python versions.
 
-    Usage: pyenv uninstall [-f|--force] <version>
+    Usage: pyenv uninstall [-f|--force] <version> ...
 
        -f  Attempt to remove the specified version without prompting
            for confirmation. If the version does not exist, do not
@@ -315,9 +323,9 @@ Displays the root directory where versions and shims are kept.
 
 ## `pyenv prefix`
 
-Displays the directory where a Python version is installed. If no
-version is given, `pyenv prefix` displays the location of the
-currently selected version.
+Displays the directories where the given Python versions are installed,
+separated by colons. If no version is given, `pyenv prefix` displays the
+locations of the currently selected versions.
 
     $ pyenv prefix 3.9.7
     /home/user/.pyenv/versions/3.9.7

@@ -63,8 +63,8 @@ DEF
   mkdir -p "$INSTALL_ROOT"
   cd "$INSTALL_ROOT"
 
-  for i in {1..5}; do stub uname '-s : echo Darwin'; done
-  for i in {1..4}; do stub sw_vers '-productVersion : echo 10.10'; done
+  for i in {1..9}; do stub uname '-s : echo Darwin'; done
+  for i in {1..3}; do stub sw_vers '-productVersion : echo 10.10'; done
 
   stub cc 'false'
   stub brew 'false'
@@ -85,11 +85,36 @@ exec 4<&1
 build_package_standard python
 DEF
   assert_success
+
+  unstub uname
+  unstub sw_vers
+
   assert_output <<OUT
 ./configure --prefix=$INSTALL_ROOT --libdir=${TMP}/install/lib
 CC=clang
 CFLAGS=no
 make -j 2
 make install
+OUT
+}
+
+@test "passthrough CFLAGS_EXTRA to micropython compiler" {
+    mkdir -p "$INSTALL_ROOT/mpy-cross"
+    mkdir -p "$INSTALL_ROOT/ports/unix"
+    mkdir -p "$INSTALL_ROOT/bin"
+    # touch "$INSTALL_ROOT/bin/python"
+    cd "$INSTALL_ROOT"
+
+    stub make true true '(for a in "$@"; do echo $a; done)|grep -E "^CFLAGS_EXTRA="' true
+    stub ln true
+    stub mkdir true
+    run_inline_definition <<DEF
+exec 4<&1
+CFLAGS_EXTRA='-Wno-floating-conversion' build_package_micropython
+DEF
+
+    #assert_success
+    assert_output <<OUT
+CFLAGS_EXTRA=-DMICROPY_PY_SYS_PATH_DEFAULT='".frozen:${TMP}/install/lib/micropython"' -Wno-floating-conversion
 OUT
 }

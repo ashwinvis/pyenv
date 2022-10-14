@@ -1,11 +1,113 @@
 ## Version History
 
+## Release 2.3.5
+
+* Add CPython 3.10.7 (#2454)
+* Docs: update Fish PATH update (#2449)
+* Add CPython 3.7.14, 3.8.14 and 3.9.14 (#2456)
+* Update miniconda3-3.9-4.12.0 (#2460)
+* Add CPython 3.11.0rc2 (#2459)
+* Add patches for 3.7.14 to support Apple Silicon (#2463)
+* Add ability to skip all use of Homebrew (#2464)
+* Drop Travis integration (#2468)
+* Build CPython 3.12+ with --with-dsymutil in MacOS (#2471)
+* Add Pyston 2.3.5 (#2476)
+
+## Release 2.3.4
+
+* Add CPython 3.11.0rc1 (#2434)
+* Add support for multiple versions in `pyenv uninstall` (#2432)
+* Add micropython 1.18 and 1.19.1 (#2443)
+* CI: support Micropython, deleted scripts; build with -v (#2447)
+* Re-allow paths in .python-version while still preventing CVE-2022-35861 (#2442)
+* CI: Bump OS versions (#2448)
+* Add Cinder 3.8 (#2433)
+
+## Release 2.3.3
+
+* Use version sort in `pyenv versions` (#2405)
+* Add CPython 3.11.0b4 (#2411)
+* Python-build: Replace deprecated git protocol use with https in docs (#2413)
+* Fix relative path traversal due to using version string in path (#2412)
+* Allow pypy2 and pypy3 patching (#2421, #2419)
+* Add CPython 3.11.0b5 (#2420)
+* Add GraalPython 22.2.0 (#2425)
+* Add CPython 3.10.6 (#2428)
+
+## Release 2.3.2
+
+* Add CPython 3.11.0b2 (#2380)
+* Honor CFLAGS_EXTRA for MicroPython #2006 (#2007)
+* Add post-install checks for curses, ctypes, lzma, and tkinter (#2353)
+* Add CPython 3.11.0b3 (#2382)
+* Add flags for Homebrew into `python-config --ldflags` (#2384)
+* Add CPython 3.10.5 (#2386)
+* Add Anaconda 2019.10, 2021.04, 2022.05; support Anaconda in add_miniconda.py (#2385)
+* Add Pyston-2.3.4 (#2390)
+* Update anaconda3-2022.05 MacOSX arm64 md5 (#2391)
+
+## Release 2.3.1
+
+* Version file read improvements (#2269)
+* Add CPython 3.11.0b1 (#2358)
+* Update 3.11-dev and add 3.12-dev (#2361)
+* Add CPython 3.9.13 (#2372)
+* Add miniconda 4.12.0 (#2371)
+* Fix endless loop in `pyenv init -` under SSH in some shell setups (#2374)
+* CI: Add tests for modified Python build scripts (#2286)
+
+## Release 2.3.0
+
+* Bump openssl 1.1 to 1.1.1n for CPython 3.7 3.8 3.9 (#2276)
+* Doc Fix: Escape a hash character causing unwanted GitHub Issue linking (#2282)
+* Add CPython 3.9.12 (#2296)
+* Add CPython 3.10.4 (#2295)
+* Add patch for 3.6.15 to support Xcode 13.3 (#2288)
+* Add patch for 3.7.12 to support Xcode 13.3 (#2292)
+* Add CONTRIBUTING.md (#2287)
+* Add PyPy 7.3.9 release 2022-03-30 (#2308)
+* Add Pyston 2.3.3 (#2316)
+* Add CPython 3.11.0a7 (#2315)
+* Add "nogil" Python v3.9.10 (#2342)
+* Support XCode 13.3 in all releases that officially support MacOS 11 (#2344)
+* Add GraalPython 22.1.0 (#2346)
+* Make PYENV_DEBUG imply -v for `pyenv install` (#2347)
+* Simplify init scheme (#2310)
+* Don't use Homebrew outside of MacOS (#2349)
+* Add `:latest` syntax to documentation for the `install` command (#2351)
+
+## Release 2.2.5
+
+* Add CPython 3.10.3
+* Add CPython 3.9.11
+* Add CPython 3.8.13
+* Add CPython 3.7.13
+* Add CPython 3.11.0a6 (#2266)
+* Add PyPy 7.3.8 (#2253)
+* Add miniconda3-3.7-4.11.0, miniconda3-3.8-4.11.0, miniconda3-3.9-4.11.0 (#2268)
+* Add pyston-2.3.2 (#2240)
+* Fix UnicodeDecodeError for CPython 3.6.15 and 3.7.12 (#2237)
+* python-build: add URL for get-pip for Python 3.6 (#2238)
+* Bump openssl to 1.1.1n for CPython 3.10.x
+
+## Release 2.2.4
+
+* Added docstrings to several undocumented functions (#2197)
+* Fix incorrect pypy 2.7-7.3.6 sha256 hashes (#2208)
+* Fix a regression in include paths when compiling ctypes in 3.6.15/3.7.12 (#2209)
+* Revert "Disable coreutils on M1 Apple Silicon with arm64 (#2020)" (#2212)
+* CPython 3.11.0a4 (#2217)
+* CPython 3.9.10 and 3.10.2 (#2219)
+* miniconda3-latest: added Linux-aarch64 (#2221)
+* Add GraalPython 22.0.0 (#2226)
+
+
 ## Release 2.2.3
 
 * Add new pypy versions (pypy2.7-7.3.2~7.3.5) to the version list (#2194)
 * Fix Python 3.7.12 compilation on macOS arm64/M1. (#2190)
-* Fix Python 3.6.15 compilation on macOS arm64/M1. (#2189) 
-* Add Anaconda3-2021.11 (#2193) 
+* Fix Python 3.6.15 compilation on macOS arm64/M1. (#2189)
+* Add Anaconda3-2021.11 (#2193)
 * CPython 3.11.0a3 (#2187)
 * Fix errant "echo" in README install instructions (#2185)
 * Add Miniforge and Mambaforge 4.10.3-10 (#2184)
@@ -48,7 +150,7 @@
 * Add documentation for shims command (#2091)
 * Add documentation for hooks command (#2089)
 * Add documentation for root command (#2088)
-* Add documentaion for prefix command (#2087)
+* Add documentation for prefix command (#2087)
 * Update to Pyston's v2 package of the 2.3.1 release (#2078)
 * Add pyston-2.3.1 support (#2075)
 * Don't update conda when installing pip (#2074)

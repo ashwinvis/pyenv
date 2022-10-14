@@ -112,11 +112,9 @@ is_mac() {
   [ $# -eq 0 ] || [ "$(osx_version)" "$@" ]
 }
 
-is_arm64_apple() {
-  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
-    return 0
-  fi
-  return 1
+can_use_homebrew() {
+    [ -z "$PYTHON_BUILD_SKIP_HOMEBREW" ] || return 1
+    is_mac || return 1
 }
 
 #  9.1  -> 901
@@ -781,6 +779,7 @@ build_package_standard_build() {
     else
       use_homebrew_zlib || true
     fi
+    use_dsymutil || true
   fi
 
   ( if [ "${CFLAGS+defined}" ] || [ "${!PACKAGE_CFLAGS+defined}" ]; then
@@ -906,7 +905,7 @@ build_package_micropython() {
     "$MAKE" $MAKE_OPTS
     cd ../ports/unix
     "$MAKE" $MAKE_OPTS axtls
-    "$MAKE" $MAKE_OPTS CFLAGS_EXTRA="-DMICROPY_PY_SYS_PATH_DEFAULT='\"${PREFIX_PATH}/lib/micropython\"'"
+    "$MAKE" $MAKE_OPTS CFLAGS_EXTRA="-DMICROPY_PY_SYS_PATH_DEFAULT='\".frozen:${PREFIX_PATH}/lib/micropython\"' $CFLAGS_EXTRA"
     "$MAKE" install $MAKE_INSTALL_OPTS PREFIX="${PREFIX_PATH}"
     ln -fs micropython "${PREFIX_PATH}/bin/python"
     mkdir -p "${PREFIX_PATH}/lib/micropython"
@@ -1329,6 +1328,7 @@ configured_with_package_dir() {
 }
 
 use_homebrew() {
+  can_use_homebrew || return 1
   # unless Homebrew is at the default /usr/local, need to add its paths to
   # compiler search to be able to use non-keg-only deps from there
   if command -v brew &>/dev/null; then
@@ -1336,7 +1336,10 @@ use_homebrew() {
     # /usr/local/lib:/usr/lib is the default library search path
     if [[ -n $brew_prefix && $brew_prefix != "/usr" && $brew_prefix != "/usr/local" ]]; then
       export CPPFLAGS="${CPPFLAGS:+${CPPFLAGS% } }-I${brew_prefix}/include"
-      export LDFLAGS="${LDFLAGS:+${LDFLAGS% } }-L${brew_prefix}/lib"
+      export LDFLAGS="${LDFLAGS:+${LDFLAGS% } }-L${brew_prefix}/lib -Wl,-rpath,${brew_prefix}/lib"
+      # `python-config` ignores LDFLAGS envvar. Adding to LIBS is the only way to add extra stuff
+      # to `python-config --ldflags` output
+      export LIBS="${LIBS:+${LIBS% } }-L${brew_prefix}/lib -Wl,-rpath,${brew_prefix}/lib"
     fi
   fi
 }
@@ -1347,6 +1350,7 @@ needs_yaml() {
 }
 
 use_homebrew_yaml() {
+  can_use_homebrew || return 1
   local libdir="$(brew --prefix libyaml 2>/dev/null || true)"
   if [ -d "$libdir" ]; then
     echo "python-build: use libyaml from homebrew"
@@ -1390,6 +1394,7 @@ has_broken_mac_readline() {
 }
 
 use_homebrew_readline() {
+  can_use_homebrew || return 1
   if ! configured_with_package_dir "python" "readline/rlconf.h"; then
     local libdir="$(brew --prefix readline 2>/dev/null || true)"
     if [ -d "$libdir" ]; then
@@ -1430,6 +1435,7 @@ has_broken_mac_openssl() {
 }
 
 use_homebrew_openssl() {
+  can_use_homebrew || return 1
   command -v brew >/dev/null || return 1
   for openssl in ${PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA:-openssl}; do
     local ssldir="$(brew --prefix "${openssl}" || true)"
@@ -1529,6 +1535,7 @@ build_package_verify_openssl() {
 }
 
 use_homebrew_zlib() {
+  can_use_homebrew || return 1
   local brew_zlib="$(brew --prefix zlib 2>/dev/null || true)"
   if [ -d "$brew_zlib" ]; then
     echo "python-build: use zlib from homebrew"
@@ -1548,6 +1555,7 @@ use_xcode_sdk_zlib() {
 }
 
 use_homebrew_tcltk() {
+  can_use_homebrew || return 1
   # get the version from the folder that homebrew versions
   local tcltk_libdir="$(brew --prefix tcl-tk 2>/dev/null || true)"
   if [ -d "$tcltk_libdir" ]; then
@@ -1589,13 +1597,13 @@ use_custom_tcltk() {
 get_tcltk_flag_from() {
   IFS=$'\n'
   # parse input string into array
-  local opts_arr=( $(xargs -n1 <<<"$1") ) 
+  local opts_arr=( $(xargs -n1 <<<"$1") )
 
   # iterate through `opts_arr`, break if `--with-tcltk-libs=` was found.
   for opts in ${opts_arr[@]}; do
     # `--with-tcltk-libs=` must be the prefix.
     if [[ "$opts" == "--with-tcltk-libs="* ]]; then
-      # return 
+      # return
       echo "$opts"
       break
     fi
@@ -1605,7 +1613,9 @@ get_tcltk_flag_from() {
 }
 
 use_tcltk() {
-  local tcltk_libdir="$(brew --prefix tcl-tk 2>/dev/null || true)"
+  if can_use_homebrew; then
+    local tcltk_libdir="$(brew --prefix tcl-tk 2>/dev/null || true)"
+  fi
   local tcl_tk_libs="$(get_tcltk_flag_from "$PYTHON_CONFIGURE_OPTS")"
 
   # if tcltk_ops_flag is in PYTHON_CONFIGURE_OPTS, use user provided tcltk
@@ -1617,26 +1627,13 @@ use_tcltk() {
   fi
 }
 
-# CPython 3.9.1+ and 3.8.10+ have old config.sub that doesn't support "arm64" arch
-# which is what Gnu uname (but not Apple uname) produces on Apple M1
-# (https://github.com/pyenv/pyenv/pull/2020#issuecomment-891911842)
-build_package_arm64_apple_disable_homebrew_coreutils() {
-  if is_arm64_apple; then
-    local brew_coreutils="$(brew --prefix coreutils 2>/dev/null || true)"
-    if [ -d "$brew_coreutils" ]; then
-      local after_list=()
-      # Bash 3 ignores IFS set for command when doing expansions so have to set it separately
-      IFS=':'; local -a list=(${PATH}); IFS="$OLDIFS"
-      for str in "${list[@]}"; do
-        if [[ "$str" != "$brew_coreutils"/* ]]; then
-          after_list+=("$str")
-        else
-          echo "python-build: excluding \`$str' from PATH"
-        fi
-      done
-      # Bash 3 ignores IFS set for command when doing expansions so have to set it separately
-      IFS=':'; export PATH="${after_list[*]}"; IFS="$OLDIFS"
-    fi
+# Since 3.12, CPython can add DWARF debug information in MacOS
+# using Apple's nonstandard way, `dsymutil', that creates a "dSYM bundle"
+# that's supposed to be installed alongside executables
+# (https://github.com/python/cpython/issues/95973).
+use_dsymutil() {
+  if [[ -n "$PYTHON_BUILD_CONFIGURE_WITH_DSYMUTIL" ]] && is_mac; then
+    package_option python configure --with-dsymutil
   fi
 }
 
@@ -1656,10 +1653,19 @@ build_package_auto_tcltk() {
   fi
 }
 
+# extglob must be set at parse time, not at runtime
+# https://stackoverflow.com/questions/49283740/bash-script-throws-syntax-errors-when-the-extglob-option-is-set-inside-a-subsh
+#
+# The function is *parsed* with "extglob" only if an outer `shopt -s exglob`
+# exists; at *runtime* you still need to activate it *within* the function.
+#
+shopt -s extglob
 apply_python_patch() {
   local patchfile
+  # needed at runtime
+  shopt -s extglob
   case "$1" in
-  Python-* | jython-* | pypy-* | stackless-* )
+  Python-* | jython-* | pypy-* | pypy[0-9].+([0-9])-* | stackless-* )
     patchfile="$(mktemp "${TMP}/python-patch.XXXXXX")"
     cat "${2:--}" >"$patchfile"
 
@@ -1668,7 +1674,9 @@ apply_python_patch() {
     patch -p$striplevel --force -i "$patchfile"
     ;;
   esac
+  shopt -u extglob
 }
+shopt -u extglob
 
 build_package_symlink_version_suffix() {
   if [[ "$CONFIGURE_OPTS $PYTHON_CONFIGURE_OPTS" == *"--enable-framework"* ]]; then
@@ -1729,7 +1737,7 @@ verify_python() {
 try_python_module() {
   if ! "$PYTHON_BIN" -c "import $1" 1>/dev/null 2>&1; then
     { colorize 1 "WARNING"
-      echo ": The Python $1 extension was not compiled. Missing the ${2:-$1}?"
+      echo ": The Python $1 extension was not compiled${3:+ $3}. Missing the ${2:-$1}?"
       return 0
     } >&3
   fi
@@ -1810,9 +1818,14 @@ build_package_verify_py27() {
 build_package_verify_py30() {
   verify_python "${2:-3.0}"
   try_python_module "bz2" "bzip2 lib"
+  try_python_module "curses" "ncurses lib"
+  try_python_module "ctypes" "libffi lib"
   try_python_module "readline" "GNU readline lib"
   verify_python_module "ssl" "OpenSSL lib"
   try_python_module "sqlite3" "SQLite3 lib"
+  if [[ -n $DISPLAY ]]; then
+    try_python_module "tkinter" "Tk toolkit" "and GUI subsystem has been detected"
+  fi
   verify_python_module "zlib" "zlib"
 }
 
@@ -1829,6 +1842,7 @@ build_package_verify_py32() {
 # Post-install check for Python 3.3.x
 build_package_verify_py33() {
   build_package_verify_py32 "$1" "${2:-3.3}"
+  try_python_module "lzma" "lzma lib"
 }
 
 # Post-install check for Python 3.4.x
@@ -1869,6 +1883,11 @@ build_package_verify_py310() {
 # Post-install check for Python 3.11.x
 build_package_verify_py311() {
   build_package_verify_py310 "$1" "${2:-3.11}"
+}
+
+# Post-install check for Python 3.12.x
+build_package_verify_py312() {
+  build_package_verify_py311 "$1" "${2:-3.12}"
 }
 
 # Post-install check for Python 3.x rolling release scripts
@@ -2160,7 +2179,7 @@ if [[ "$CONFIGURE_OPTS $PYTHON_CONFIGURE_OPTS" == *"--enable-universalsdk"* ]]; 
     exit 1
   fi
   package_option python configure --enable-universalsdk=/
-  if [[ "$CONFIGURE_OPTS $PYTHON_CONFIGURE_OPTS" != *"--enable-universal-archs"* ]]; then
+  if [[ "$CONFIGURE_OPTS $PYTHON_CONFIGURE_OPTS" != *"--with-universal-archs"* ]]; then
     # in CPython's configure.ac, --with-universal-archs defaults to 'intel' which means i386 + x86_64
     # since 2.7.5 and 3.3.0 -- i.e. in all non-EOL versions
     # Apple Silicon cannot build these, in it, it rather makes sense to default to Universal2 binaries
@@ -2233,6 +2252,9 @@ if [ -z "${GET_PIP_URL}" ]; then
       ;;
     3.5 | 3.5.* )
       GET_PIP_URL="https://bootstrap.pypa.io/pip/3.5/get-pip.py"
+      ;;
+    3.6 | 3.6.* )
+      GET_PIP_URL="https://bootstrap.pypa.io/pip/3.6/get-pip.py"
       ;;
     * )
       GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
