@@ -1,4 +1,44 @@
-## Version History
+# Version History
+
+## Release 2.3.8
+
+* Export detected shell environment in pyenv-init by @ianchen-tw in https://github.com/pyenv/pyenv/pull/2540
+* Add CPython 3.12.0a3 by @saaketp in https://github.com/pyenv/pyenv/pull/2545
+* Add CPython 3.11.1 by @anton-petrov in https://github.com/pyenv/pyenv/pull/2549
+* Add CPython 3.10.9 by @rudisimo in https://github.com/pyenv/pyenv/pull/2544
+* Add 3.7.16, 3.8.16, 3.9.16 by @chadac in https://github.com/pyenv/pyenv/pull/2550
+
+## Release 2.3.7
+
+* Add Python version 3.11 to the macOS build by @jbkkd in https://github.com/pyenv/pyenv/pull/2510
+* Don't use Zlib from XCode SDK if a custom compiler is used by @native-api in https://github.com/pyenv/pyenv/pull/2516
+* Change line endings from CRLF to LF by @hoang-himself in https://github.com/pyenv/pyenv/pull/2517
+* Fix resolution of a name that's a prefix of another name by @native-api in https://github.com/pyenv/pyenv/pull/2521
+* GitHub Workflows security hardening by @sashashura in https://github.com/pyenv/pyenv/pull/2511
+* Add nushell to activate list by @theref in https://github.com/pyenv/pyenv/pull/2524
+* Fix compilation error when building OpenSSL 1.1.1q in MacOS 11+ for 3.9.15 and 3.8.15 by @twangboy in https://github.com/pyenv/pyenv/pull/2520
+* Add simple `.editorconfig` file by @aphedges in https://github.com/pyenv/pyenv/pull/2518
+* Support `aria2c` being a snap by @native-api in https://github.com/pyenv/pyenv/pull/2528
+* Add CPython 3.12.0a2 by @saaketp in https://github.com/pyenv/pyenv/pull/2527
+* Add --no-push-path option by @isaacl in https://github.com/pyenv/pyenv/pull/2526
+* Fix typo in README.md by @weensy in https://github.com/pyenv/pyenv/pull/2535
+* Copy auto installer oneliner to readme by @spookyuser in https://github.com/pyenv/pyenv/pull/2538
+
+## Release 2.3.6
+
+* Add CPython 3.10.8 (#2480)
+* Add CPython 3.7.15, 3.8.15, and 3.9.15 (#2482)
+* Add CPython 3.11.0 (#2493)
+* Add CPython 3.12.0a1 (#2495)
+* Add graalpy-22.3.0 (#2497)
+* Auto-resolve prefixes to the latest version (#2487)
+  * It must be a full prefix -- the actual searched prefix is `<prefix>[-.]`
+  * Other flavors are likely sorted incorrectly atm
+  * Prereleases and versions with some suffixes (`-dev`, `-src`, `-latest`) are not searched
+  * `pyenv uninstall` has been excluded from the resolution feature: deleting a dynamically selected installation could be problematic
+* Fix OpenSSL 1.1.1q compilation error in MacOS 11+ (#2500)
+* Link to Tcl/Tk from Homebrew via pkgconfig for 3.11+ (#2501)
+* Fix syntax error in `pyenv init -` if PYENV_ROOT has spaces (#2506)
 
 ## Release 2.3.5
 

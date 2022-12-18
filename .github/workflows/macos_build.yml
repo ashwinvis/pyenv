@@ -1,15 +1,20 @@
 name: macos_build
 on: [pull_request, push]
+
+permissions:
+  contents: read  #  to fetch code (actions/checkout)
+
 jobs:
   macos_build:
     strategy:
       fail-fast: false
       matrix:
         python-version:
-          - 3.7.13
-          - 3.8.13
-          - 3.9.13
-          - 3.10.6
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
