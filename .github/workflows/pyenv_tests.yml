@@ -1,15 +1,19 @@
 name: pyenv_tests
 on: [pull_request, push]
+
+permissions:
+  contents: read  #  to fetch code (actions/checkout)
+
 jobs:
   pyenv_tests:
     strategy:
       fail-fast: false
       matrix:
         os:
+          - ubuntu-22.04
           - ubuntu-20.04
-          - ubuntu-18.04
+          - macos-12
           - macos-11
-          - macos-10.15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2

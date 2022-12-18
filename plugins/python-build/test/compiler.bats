@@ -63,7 +63,7 @@ DEF
   mkdir -p "$INSTALL_ROOT"
   cd "$INSTALL_ROOT"
 
-  for i in {1..10}; do stub uname '-s : echo Darwin'; done
+  for i in {1..9}; do stub uname '-s : echo Darwin'; done
   for i in {1..3}; do stub sw_vers '-productVersion : echo 10.10'; done
 
   stub cc 'false'
@@ -115,6 +115,6 @@ DEF
 
     #assert_success
     assert_output <<OUT
-CFLAGS_EXTRA=-DMICROPY_PY_SYS_PATH_DEFAULT='"${TMP}/install/lib/micropython"' -Wno-floating-conversion
+CFLAGS_EXTRA=-DMICROPY_PY_SYS_PATH_DEFAULT='".frozen:${TMP}/install/lib/micropython"' -Wno-floating-conversion
 OUT
 }

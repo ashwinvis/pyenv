@@ -145,6 +145,10 @@ IFS=$'\n' scripts=(`pyenv-hooks install`)
 IFS="$OLDIFS"
 for script in "${scripts[@]}"; do source "$script"; done
 
+# Try to resolve a prefix if user indeed gave a prefix.
+# We install the version under the resolved name
+# and hooks also see the resolved name
+DEFINITION="$(pyenv-latest -q -k "$DEFINITION" || echo "$DEFINITION")"
 
 # Set VERSION_NAME from $DEFINITION, if it is not already set. Then
 # compute the installation prefix.
@@ -215,7 +219,7 @@ if [ -z "${PYENV_BOOTSTRAP_VERSION}" ]; then
       done
     fi
     if [ -n "$PYENV_BOOTSTRAP_VERSION" ]; then
-      for dep in curses genc pycparser; do
+      for dep in pycparser; do
         if ! PYENV_VERSION="$PYENV_BOOTSTRAP_VERSION" pyenv-exec python -c "import ${dep}" 1>/dev/null 2>&1; then
           echo "pyenv-install: $VERSION_NAME: PyPy requires \`${dep}' in $PYENV_BOOTSTRAP_VERSION to build from source." >&2
           exit 1

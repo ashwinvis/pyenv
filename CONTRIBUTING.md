@@ -1,7 +1,7 @@
 General guidance
 ================
 
-* The usual principes of respecting existing conventions and making sure that your changes
+* The usual principles of respecting existing conventions and making sure that your changes
   are in line with the overall product design apply when contributing code to Pyenv.
 
 * We are limited to Bash 3.2 features
@@ -9,6 +9,9 @@ General guidance
   That's because that's the version shipped with MacOS.
   (They didn't upgrade past it and switched to Zsh because later versions
   are covered by GPLv3 which has additional restrictions unacceptable for Apple.)
+
+  You can still add performance optimizations etc that take advantage of newer Bash features
+  as long as there is a fallback execution route for Bash 3.
 
 * Be extra careful when submitting logic specific for the Apple Silicon platform
 
@@ -78,11 +81,13 @@ Deprecation policy
 We do not provide official support for EOL releases and environments or otherwise provide any kind of extended support for old Python releases.
 
 We do however accept fixes from interested parties that would allow running older, including EOL, releases in newer environments.
-In addition to the above general requirements for release-specific fixes,
+In addition to the above requirements for release-specific fixes,
 
 * Such a fix must not add maintenance burden (e.g. add new logic to `python-build` that has to be kept there indefinitely)
   * Unless the added logic is useful for both EOL and non-EOL releases. In this case, it will be considered as being primarily an improvement for non-EOL releases.
-* We do not provide any guarantees from our side that any such fix works or will continue working going forward. It's up to the interested parties to maintain it.
+* Support is provided on a "best effort" basis: we do not maintain these fixes but won't actively break them, either, and accept any corrections.
+  Since old releases never change, it's pretty safe to assume that the fixes will continue to work until a later version
+  of an environment introduces further incompatible changes.
 
 
 Advanced changes / adding new Python flavor support

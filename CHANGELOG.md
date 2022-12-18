@@ -1,4 +1,90 @@
-## Version History
+# Version History
+
+## Release 2.3.8
+
+* Export detected shell environment in pyenv-init by @ianchen-tw in https://github.com/pyenv/pyenv/pull/2540
+* Add CPython 3.12.0a3 by @saaketp in https://github.com/pyenv/pyenv/pull/2545
+* Add CPython 3.11.1 by @anton-petrov in https://github.com/pyenv/pyenv/pull/2549
+* Add CPython 3.10.9 by @rudisimo in https://github.com/pyenv/pyenv/pull/2544
+* Add 3.7.16, 3.8.16, 3.9.16 by @chadac in https://github.com/pyenv/pyenv/pull/2550
+
+## Release 2.3.7
+
+* Add Python version 3.11 to the macOS build by @jbkkd in https://github.com/pyenv/pyenv/pull/2510
+* Don't use Zlib from XCode SDK if a custom compiler is used by @native-api in https://github.com/pyenv/pyenv/pull/2516
+* Change line endings from CRLF to LF by @hoang-himself in https://github.com/pyenv/pyenv/pull/2517
+* Fix resolution of a name that's a prefix of another name by @native-api in https://github.com/pyenv/pyenv/pull/2521
+* GitHub Workflows security hardening by @sashashura in https://github.com/pyenv/pyenv/pull/2511
+* Add nushell to activate list by @theref in https://github.com/pyenv/pyenv/pull/2524
+* Fix compilation error when building OpenSSL 1.1.1q in MacOS 11+ for 3.9.15 and 3.8.15 by @twangboy in https://github.com/pyenv/pyenv/pull/2520
+* Add simple `.editorconfig` file by @aphedges in https://github.com/pyenv/pyenv/pull/2518
+* Support `aria2c` being a snap by @native-api in https://github.com/pyenv/pyenv/pull/2528
+* Add CPython 3.12.0a2 by @saaketp in https://github.com/pyenv/pyenv/pull/2527
+* Add --no-push-path option by @isaacl in https://github.com/pyenv/pyenv/pull/2526
+* Fix typo in README.md by @weensy in https://github.com/pyenv/pyenv/pull/2535
+* Copy auto installer oneliner to readme by @spookyuser in https://github.com/pyenv/pyenv/pull/2538
+
+## Release 2.3.6
+
+* Add CPython 3.10.8 (#2480)
+* Add CPython 3.7.15, 3.8.15, and 3.9.15 (#2482)
+* Add CPython 3.11.0 (#2493)
+* Add CPython 3.12.0a1 (#2495)
+* Add graalpy-22.3.0 (#2497)
+* Auto-resolve prefixes to the latest version (#2487)
+  * It must be a full prefix -- the actual searched prefix is `<prefix>[-.]`
+  * Other flavors are likely sorted incorrectly atm
+  * Prereleases and versions with some suffixes (`-dev`, `-src`, `-latest`) are not searched
+  * `pyenv uninstall` has been excluded from the resolution feature: deleting a dynamically selected installation could be problematic
+* Fix OpenSSL 1.1.1q compilation error in MacOS 11+ (#2500)
+* Link to Tcl/Tk from Homebrew via pkgconfig for 3.11+ (#2501)
+* Fix syntax error in `pyenv init -` if PYENV_ROOT has spaces (#2506)
+
+## Release 2.3.5
+
+* Add CPython 3.10.7 (#2454)
+* Docs: update Fish PATH update (#2449)
+* Add CPython 3.7.14, 3.8.14 and 3.9.14 (#2456)
+* Update miniconda3-3.9-4.12.0 (#2460)
+* Add CPython 3.11.0rc2 (#2459)
+* Add patches for 3.7.14 to support Apple Silicon (#2463)
+* Add ability to skip all use of Homebrew (#2464)
+* Drop Travis integration (#2468)
+* Build CPython 3.12+ with --with-dsymutil in MacOS (#2471)
+* Add Pyston 2.3.5 (#2476)
+
+## Release 2.3.4
+
+* Add CPython 3.11.0rc1 (#2434)
+* Add support for multiple versions in `pyenv uninstall` (#2432)
+* Add micropython 1.18 and 1.19.1 (#2443)
+* CI: support Micropython, deleted scripts; build with -v (#2447)
+* Re-allow paths in .python-version while still preventing CVE-2022-35861 (#2442)
+* CI: Bump OS versions (#2448)
+* Add Cinder 3.8 (#2433)
+
+## Release 2.3.3
+
+* Use version sort in `pyenv versions` (#2405)
+* Add CPython 3.11.0b4 (#2411)
+* Python-build: Replace deprecated git protocol use with https in docs (#2413)
+* Fix relative path traversal due to using version string in path (#2412)
+* Allow pypy2 and pypy3 patching (#2421, #2419)
+* Add CPython 3.11.0b5 (#2420)
+* Add GraalPython 22.2.0 (#2425)
+* Add CPython 3.10.6 (#2428)
+
+## Release 2.3.2
+
+* Add CPython 3.11.0b2 (#2380)
+* Honor CFLAGS_EXTRA for MicroPython #2006 (#2007)
+* Add post-install checks for curses, ctypes, lzma, and tkinter (#2353)
+* Add CPython 3.11.0b3 (#2382)
+* Add flags for Homebrew into `python-config --ldflags` (#2384)
+* Add CPython 3.10.5 (#2386)
+* Add Anaconda 2019.10, 2021.04, 2022.05; support Anaconda in add_miniconda.py (#2385)
+* Add Pyston-2.3.4 (#2390)
+* Update anaconda3-2022.05 MacOSX arm64 md5 (#2391)
 
 ## Release 2.3.1
 

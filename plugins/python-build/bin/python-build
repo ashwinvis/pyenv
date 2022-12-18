@@ -112,6 +112,11 @@ is_mac() {
   [ $# -eq 0 ] || [ "$(osx_version)" "$@" ]
 }
 
+can_use_homebrew() {
+    [ -z "$PYTHON_BUILD_SKIP_HOMEBREW" ] || return 1
+    is_mac || return 1
+}
+
 #  9.1  -> 901
 # 10.9  -> 1009
 # 10.10 -> 1010
@@ -355,12 +360,38 @@ http_head_aria2c() {
 }
 
 http_get_aria2c() {
-  local out="${2:-$(mktemp "out.XXXXXX")}"
-  if aria2c --allow-overwrite=true --no-conf=true -o "${out}" ${ARIA2_OPTS} "$1" >&4; then
+  # aria2c always treats -o argument as a relative path
+  local out dir_out;
+  if [[ -n "$2" ]]; then
+    out="$(basename $2)";
+    dir_out="$(dirname $2)";
+  else
+    out="$(mktemp "out.XXXXXX")";
+    dir_out="$TMPDIR";
+  fi
+
+  # In Ubuntu, aria2c is only available as a snap. Snaps cannot read or write /tmp
+  # (files cannot be found, any write result is silently discarded).
+  local aria2c_is_snap;
+  if [[ $(command -v aria2c) == "/snap/"* ]]; then aria2c_is_snap=1; fi
+
+  if [[ -n $aria2c_is_snap ]]; then
+    local real_dir_out="$dir_out"
+    # presumably, snaps can always write to under $HOME
+    dir_out="$HOME"
+  fi
+
+  if aria2c --allow-overwrite=true --no-conf=true -d "${dir_out}" -o "${out}" ${ARIA2_OPTS} "$1" >&4; then
     [ -n "$2" ] || cat "${out}"
   else
     false
   fi
+  ret=$?
+
+  if [[ -n "$2" && -n $aria2c_is_snap ]]; then
+      mv "$dir_out/$out" "$real_dir_out/$out"
+  fi
+  return "$ret"
 }
 
 http_head_curl() {
@@ -709,7 +740,7 @@ build_package() {
 
   echo "Installing ${package_name}..." >&2
 
-  [ -n "$HAS_PATCH" ] && apply_python_patch "$package_name"
+  [ -n "$HAS_PATCH" ] && apply_patch "$package_name" <(cat "${package_name}.patch")
 
   for command in $commands; do
     "build_package_${command}" "$package_name"
@@ -774,6 +805,7 @@ build_package_standard_build() {
     else
       use_homebrew_zlib || true
     fi
+    use_dsymutil || true
   fi
 
   ( if [ "${CFLAGS+defined}" ] || [ "${!PACKAGE_CFLAGS+defined}" ]; then
@@ -899,7 +931,7 @@ build_package_micropython() {
     "$MAKE" $MAKE_OPTS
     cd ../ports/unix
     "$MAKE" $MAKE_OPTS axtls
-    "$MAKE" $MAKE_OPTS CFLAGS_EXTRA="-DMICROPY_PY_SYS_PATH_DEFAULT='\"${PREFIX_PATH}/lib/micropython\"' $CFLAGS_EXTRA"
+    "$MAKE" $MAKE_OPTS CFLAGS_EXTRA="-DMICROPY_PY_SYS_PATH_DEFAULT='\".frozen:${PREFIX_PATH}/lib/micropython\"' $CFLAGS_EXTRA"
     "$MAKE" install $MAKE_INSTALL_OPTS PREFIX="${PREFIX_PATH}"
     ln -fs micropython "${PREFIX_PATH}/bin/python"
     mkdir -p "${PREFIX_PATH}/lib/micropython"
@@ -908,7 +940,13 @@ build_package_micropython() {
 
 pypy_architecture() {
   case "$(uname -s)" in
-  "Darwin" ) echo "osx64" ;;
+  "Darwin" )
+    case "$(uname -m)" in
+    "arm64" ) echo "osarm64" ;;
+    "x86_64" ) echo "osx64" ;;
+    * ) return 1 ;;
+    esac
+    ;;
   "Linux" )
     case "$(uname -m)" in
     "armel" ) echo "linux-armel" ;;
@@ -932,10 +970,30 @@ pypy_architecture() {
   esac
 }
 
+graalpy_architecture() {
+  case "$(uname -s)" in
+  "Darwin" )
+    case "$(uname -m)" in
+    "x86_64" ) echo "macos-amd64" ;;
+    "arm64" ) echo "macos-aarch64" ;;
+    * ) return 1 ;;
+    esac
+    ;;
+  "Linux" )
+    case "$(uname -m)" in
+    "x86_64" ) echo "linux-amd64" ;;
+    "aarch64" ) echo "linux-aarch64" ;;
+    * ) return 1 ;;
+    esac
+    ;;
+  esac
+}
+
 pyston_architecture() {
   pypy_architecture
 }
 
+# Note: not used by graalpy >= 23.3.0 anymore
 build_package_graalpython() {
     build_package_copy
     ln -fs "${PREFIX_PATH}/bin/graalpython" "${PREFIX_PATH}/bin/python"
@@ -1065,13 +1123,13 @@ setup_builtin_patches() {
   local package_name="$1"
   local package_patch_path="${DEFINITION_PATH%/*}/patches/${DEFINITION_PATH##*/}/${package_name}"
 
-  ORIG_HAS_PATCH="$HAS_PATCH"
 # Apply built-in patches if patch was not given from stdin
-  if [ -z "$HAS_PATCH" ] && [ -d "${package_patch_path}" ]; then
+  if [[ -n "$HAS_STDIN_PATCH" ]] && package_is_python "${package_name}"; then
+    cat >"${package_name}.patch"
+    HAS_PATCH=true
+  elif [[ -d "${package_patch_path}" ]]; then
     { find "${package_patch_path}" -maxdepth 1 -type f
     } 2>/dev/null | sort | xargs cat 1>"${package_name}.patch"
-    exec <&-
-    exec <"${package_name}.patch"
     HAS_PATCH=true
   fi
 }
@@ -1079,7 +1137,7 @@ setup_builtin_patches() {
 cleanup_builtin_patches() {
   local package_name="$1"
   rm -f "${package_name}.patch"
-  HAS_PATCH="$ORIG_HAS_PATCH"
+  unset HAS_PATCH
 }
 
 fix_directory_permissions() {
@@ -1322,10 +1380,10 @@ configured_with_package_dir() {
 }
 
 use_homebrew() {
-  is_mac || return 1
+  can_use_homebrew || return 1
   # unless Homebrew is at the default /usr/local, need to add its paths to
   # compiler search to be able to use non-keg-only deps from there
-  if is_mac && command -v brew &>/dev/null; then
+  if command -v brew &>/dev/null; then
     local brew_prefix="$(brew --prefix 2>/dev/null || true)"
     # /usr/local/lib:/usr/lib is the default library search path
     if [[ -n $brew_prefix && $brew_prefix != "/usr" && $brew_prefix != "/usr/local" ]]; then
@@ -1344,7 +1402,7 @@ needs_yaml() {
 }
 
 use_homebrew_yaml() {
-  is_mac || return 1
+  can_use_homebrew || return 1
   local libdir="$(brew --prefix libyaml 2>/dev/null || true)"
   if [ -d "$libdir" ]; then
     echo "python-build: use libyaml from homebrew"
@@ -1388,7 +1446,7 @@ has_broken_mac_readline() {
 }
 
 use_homebrew_readline() {
-  is_mac || return 1
+  can_use_homebrew || return 1
   if ! configured_with_package_dir "python" "readline/rlconf.h"; then
     local libdir="$(brew --prefix readline 2>/dev/null || true)"
     if [ -d "$libdir" ]; then
@@ -1429,7 +1487,7 @@ has_broken_mac_openssl() {
 }
 
 use_homebrew_openssl() {
-  is_mac || return 1
+  can_use_homebrew || return 1
   command -v brew >/dev/null || return 1
   for openssl in ${PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA:-openssl}; do
     local ssldir="$(brew --prefix "${openssl}" || true)"
@@ -1529,7 +1587,7 @@ build_package_verify_openssl() {
 }
 
 use_homebrew_zlib() {
-  is_mac || return 1
+  can_use_homebrew || return 1
   local brew_zlib="$(brew --prefix zlib 2>/dev/null || true)"
   if [ -d "$brew_zlib" ]; then
     echo "python-build: use zlib from homebrew"
@@ -1538,6 +1596,8 @@ use_homebrew_zlib() {
 }
 
 use_xcode_sdk_zlib() {
+  # If a custom compiler is used, including XCode SDK will likely break it
+  [[ "${CC:-clang}" != "clang" || "$(command -v clang 2>/dev/null || true)" != "/usr/bin/clang" ]] && return 1
   local xc_sdk_path="$(xcrun --show-sdk-path 2>/dev/null || true)"
   if [ -d "$xc_sdk_path" ]; then
     echo "python-build: use zlib from xcode sdk"
@@ -1549,14 +1609,17 @@ use_xcode_sdk_zlib() {
 }
 
 use_homebrew_tcltk() {
-  is_mac || return 1
+  can_use_homebrew || return 1
   # get the version from the folder that homebrew versions
   local tcltk_libdir="$(brew --prefix tcl-tk 2>/dev/null || true)"
   if [ -d "$tcltk_libdir" ]; then
     echo "python-build: use tcl-tk from homebrew"
-    local tcltk_version="$(sh -c '. '"$tcltk_libdir"'/lib/tclConfig.sh; echo $TCL_VERSION')"
-    package_option python configure --with-tcltk-libs="-L$tcltk_libdir/lib -ltcl$tcltk_version -ltk$tcltk_version"
-    package_option python configure --with-tcltk-includes="-I$tcltk_libdir/include"
+    if [[ -z "$PYTHON_BUILD_TCLTK_USE_PKGCONFIG" ]]; then
+      local tcltk_version="$(sh -c '. '"$tcltk_libdir"'/lib/tclConfig.sh; echo $TCL_VERSION')"
+      package_option python configure --with-tcltk-libs="-L$tcltk_libdir/lib -ltcl$tcltk_version -ltk$tcltk_version"
+      package_option python configure --with-tcltk-includes="-I$tcltk_libdir/include"
+    fi
+    export PKG_CONFIG_PATH="${tcltk_libdir}/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
   fi
 }
 
@@ -1591,13 +1654,13 @@ use_custom_tcltk() {
 get_tcltk_flag_from() {
   IFS=$'\n'
   # parse input string into array
-  local opts_arr=( $(xargs -n1 <<<"$1") ) 
+  local opts_arr=( $(xargs -n1 <<<"$1") )
 
   # iterate through `opts_arr`, break if `--with-tcltk-libs=` was found.
   for opts in ${opts_arr[@]}; do
     # `--with-tcltk-libs=` must be the prefix.
     if [[ "$opts" == "--with-tcltk-libs="* ]]; then
-      # return 
+      # return
       echo "$opts"
       break
     fi
@@ -1607,7 +1670,7 @@ get_tcltk_flag_from() {
 }
 
 use_tcltk() {
-  if is_mac; then
+  if can_use_homebrew; then
     local tcltk_libdir="$(brew --prefix tcl-tk 2>/dev/null || true)"
   fi
   local tcl_tk_libs="$(get_tcltk_flag_from "$PYTHON_CONFIGURE_OPTS")"
@@ -1618,6 +1681,16 @@ use_tcltk() {
     use_custom_tcltk "$tcl_tk_libs"
   elif [ -d "$tcltk_libdir" ]; then
     use_homebrew_tcltk
+  fi
+}
+
+# Since 3.12, CPython can add DWARF debug information in MacOS
+# using Apple's nonstandard way, `dsymutil', that creates a "dSYM bundle"
+# that's supposed to be installed alongside executables
+# (https://github.com/python/cpython/issues/95973).
+use_dsymutil() {
+  if [[ -n "$PYTHON_BUILD_CONFIGURE_WITH_DSYMUTIL" ]] && is_mac; then
+    package_option python configure --with-dsymutil
   fi
 }
 
@@ -1637,19 +1710,32 @@ build_package_auto_tcltk() {
   fi
 }
 
-apply_python_patch() {
-  local patchfile
+# extglob must be set at both parse time and runtime
+# https://stackoverflow.com/questions/49283740/bash-script-throws-syntax-errors-when-the-extglob-option-is-set-inside-a-subsh
+shopt -s extglob
+package_is_python() {
+  shopt -s extglob
   case "$1" in
-  Python-* | jython-* | pypy-* | stackless-* )
-    patchfile="$(mktemp "${TMP}/python-patch.XXXXXX")"
-    cat "${2:--}" >"$patchfile"
-
-    local striplevel=0
-    grep -q '^diff --git a/' "$patchfile" && striplevel=1
-    patch -p$striplevel --force -i "$patchfile"
-    ;;
+    Python-* | jython-* | pypy-* | pypy[0-9].+([0-9])-* | stackless-* )
+      return 0
+      ;;
   esac
+  return 1
+  shopt -u extglob
 }
+shopt -u extglob
+
+apply_patch() {
+  local package_name="$1"
+  local patchfile
+  patchfile="$(mktemp "${TMP}/python-patch.XXXXXX")"
+  cat "${2:--}" >"$patchfile"
+
+  local striplevel=0
+  grep -q '^diff --git a/' "$patchfile" && striplevel=1
+  patch -p$striplevel --force -i "$patchfile"
+}
+
 
 build_package_symlink_version_suffix() {
   if [[ "$CONFIGURE_OPTS $PYTHON_CONFIGURE_OPTS" == *"--enable-framework"* ]]; then
@@ -1989,7 +2075,7 @@ for option in "${OPTIONS[@]}"; do
     VERBOSE=true
     ;;
   "p" | "patch" )
-    HAS_PATCH=true
+    HAS_STDIN_PATCH=true
     ;;
   "g" | "debug" )
     DEBUG=true
