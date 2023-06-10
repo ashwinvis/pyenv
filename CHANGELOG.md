@@ -1,5 +1,95 @@
 # Version History
 
+## Release v2.3.19
+
+* Add CPython 3.7.17, 3.8.17 and 3.9.17 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2711
+* Add CPython 3.11.4 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2715
+* Add CPython 3.10.12 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2714
+* Add CPython 3.12.0b2 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2713
+
+## Release 2.3.18
+
+* Fix not showing symlink contents for unselected versions in `pyenv versions` by @native-api in https://github.com/pyenv/pyenv/pull/2675
+* Correct link in has_tar_xz_support else branch of 3.10.11 and 3.11.3 by @mirekdlugosz in https://github.com/pyenv/pyenv/pull/2677
+* Fix #2682: Correct pyenv_user_setup.bash file by @tomschr in https://github.com/pyenv/pyenv/pull/2687
+* fix: updating heredoc delimiter to be random and unique by @aviadhahami in https://github.com/pyenv/pyenv/pull/2691
+* Support ksh alternative names by @kpschoedel in https://github.com/pyenv/pyenv/pull/2697
+* Add CPython 3.12.0b1 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2701
+* Update 3.12-dev and add 3.13-dev by @t0b3 in https://github.com/pyenv/pyenv/pull/2703
+
+## Release 2.3.17
+
+* Try locate `readlink` first in pyenv-hooks, fix #2654 by @Harry-Chen in https://github.com/pyenv/pyenv/pull/2655
+* Add CPython 3.12.0a7 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2668
+* Add CPython 3.11.3 by @mirekdlugosz in https://github.com/pyenv/pyenv/pull/2671
+* Add CPython 3.10.11 by @mirekdlugosz in https://github.com/pyenv/pyenv/pull/2670
+
+## Release 2.3.16
+
+* Add Miniforge3-22.11.1-4 by @jlec in https://github.com/pyenv/pyenv/pull/2642
+* Add Anaconda3-2023.03 by @anton-petrov in https://github.com/pyenv/pyenv/pull/2648
+
+## Release 2.3.15
+
+* Add miniconda 23.1.0-1 by @aphedges in https://github.com/pyenv/pyenv/pull/2635
+* Add CPython 3.12.0a6 by @saaketp in https://github.com/pyenv/pyenv/pull/2638
+
+## Release 2.3.14
+
+* Fix indentation by @rafrafek in https://github.com/pyenv/pyenv/pull/2620
+* Support for "BusyBox version" of "head" by @schuellerf in https://github.com/pyenv/pyenv/pull/2629
+* bpo-27987 for v3.5.10 and v3.6.15: align by 16bytes on 64bit platforms by @chaimleib in https://github.com/pyenv/pyenv/pull/2630
+* bpo-36231 for v3.5.10: fix Unsupported MacOS X CPU type in ffi.h by @chaimleib in https://github.com/pyenv/pyenv/pull/2633
+* README: clarify behavior of `pyenv latest` by @mrienstra in https://github.com/pyenv/pyenv/pull/2634
+
+## Release 2.3.13
+
+* Fix pyenv-latest to ignore virtualenvs by @native-api in https://github.com/pyenv/pyenv/pull/2608
+* Show symlink contents in non-bare `pyenv versions' by @native-api in https://github.com/pyenv/pyenv/pull/2609
+* Ignore virtualenvs in `pyenv latest' in a clean way by @native-api in https://github.com/pyenv/pyenv/pull/2610
+* Fix link resolving in pyenv-versions by @laggardkernel in https://github.com/pyenv/pyenv/pull/2612
+* Add CPython 3.11.2 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2615
+* Add CPython 3.10.10 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2616
+* Add CPython 3.12.0a5 by @Afront in https://github.com/pyenv/pyenv/pull/2614
+
+## Release 2.3.12
+
+* Undefined name: do not forget self when accessing flavor by @cclauss in https://github.com/pyenv/pyenv/pull/2595
+* Fix wrong libpython being linked to in MacOS by @native-api in https://github.com/pyenv/pyenv/pull/2596
+* Fix `:latest` by @native-api in https://github.com/pyenv/pyenv/pull/2599
+* Fix `pyenv which` to support auto-resolved prefixes by @native-api in https://github.com/pyenv/pyenv/pull/2601
+* Add more recent build of nogil Python. by @colesbury in https://github.com/pyenv/pyenv/pull/2602
+
+## Release 2.3.11
+
+* Add CPython 3.12.0a4 by @Afront in https://github.com/pyenv/pyenv/pull/2590
+* Add a script to add the latest miniforge and mambaforge versions by @smcgivern in https://github.com/pyenv/pyenv/pull/2560
+* Add missing Miniforge/Mambaforge versions (4.10.2-0 - 22.9.0-3) by @smcgivern in https://github.com/pyenv/pyenv/pull/2591
+* Fix using dependencies from Ports in FreeBSD that are not searched with pkg-config by @native-api in https://github.com/pyenv/pyenv/pull/2593
+* Fix priority for user-supplied configure and make flags by (**_only set --enable-shared if user hasn't supplied --disable-shared_**) @native-api in https://github.com/pyenv/pyenv/pull/2592
+* Fix a compilation error in 3.8.10+ and 3.9.5+ when linking against Op… by @native-api in https://github.com/pyenv/pyenv/pull/2594
+
+## Release 2.3.10
+
+* Remove stray newline after python-build installation by @tklauser in https://github.com/pyenv/pyenv/pull/2566
+* Allow multiple versions for pyenv-install by @rockandska in https://github.com/pyenv/pyenv/pull/2568
+* --enable-shared by default by @anton-petrov in https://github.com/pyenv/pyenv/pull/2554
+* Fix non-bash output while detecting shell by @ianchen-tw in https://github.com/pyenv/pyenv/pull/2561
+* add pypy 7.3.11 release by @dand-oss in https://github.com/pyenv/pyenv/pull/2576
+* Mention how to build for maximum performance by @hauntsaninja in https://github.com/pyenv/pyenv/pull/2579
+* Add miniconda 22.11.1-1 by @aphedges in https://github.com/pyenv/pyenv/pull/2583
+* Add Fig as autocomplete suggestion  by @brendanfalk in https://github.com/pyenv/pyenv/pull/2574
+* Fix using dependencies from Ports in BSD with no pkg-config by @native-api in https://github.com/pyenv/pyenv/pull/2586
+
+## Release 2.3.9
+
+* Add -latest suffix to miniforge3 by @nwh in https://github.com/pyenv/pyenv/pull/2551
+* Add PyPy 7.3.10 by @dand-oss in https://github.com/pyenv/pyenv/pull/2553
+* Add miniforge3 and mambaforge 22.9.0-2 by @smcgivern in https://github.com/pyenv/pyenv/pull/2559
+* Fix compilation error when building OpenSSL 1.1.1q in MacOS 11+ for 3.9.16 by @lisbethw1130 in https://github.com/pyenv/pyenv/pull/2558
+* Add `openssl` patches for 3.7.15, 3.7.16, and 3.8.16 by @samdoran in https://github.com/pyenv/pyenv/pull/2564
+* Add support for Anaconda3-2022.10 by @huypn12 in https://github.com/pyenv/pyenv/pull/2565
+
 ## Release 2.3.8
 
 * Export detected shell environment in pyenv-init by @ianchen-tw in https://github.com/pyenv/pyenv/pull/2540

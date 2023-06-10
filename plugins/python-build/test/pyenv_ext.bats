@@ -89,7 +89,7 @@ install_tmp_fixture() {
 }
 
 resolve_link() {
-  $(type -P greadlink readlink | head -1) "$1"
+  $(type -P greadlink readlink | head -n1) "$1"
 }
 
 run_inline_definition_with_name() {
@@ -123,8 +123,8 @@ run_inline_definition_with_name() {
 
   assert_build_log <<OUT
 patch -p0 --force -i $TMP/python-patch.XXX
-Python-3.6.2: CPPFLAGS="-I${TMP}/install/include " LDFLAGS="-L${TMP}/install/lib "
-Python-3.6.2: --prefix=$INSTALL_ROOT --libdir=$INSTALL_ROOT/lib
+Python-3.6.2: CPPFLAGS="-I${TMP}/install/include" LDFLAGS="-L${TMP}/install/lib -Wl,-rpath,${TMP}/install/lib"
+Python-3.6.2: --prefix=$INSTALL_ROOT --enable-shared --libdir=$INSTALL_ROOT/lib
 make -j 2
 make install
 OUT
@@ -153,8 +153,8 @@ OUT
 patch: bar
 patch: baz
 patch: foo
-Python-3.6.2: CPPFLAGS="-I${TMP}/install/include " LDFLAGS="-L${TMP}/install/lib "
-Python-3.6.2: --prefix=$INSTALL_ROOT --libdir=$INSTALL_ROOT/lib
+Python-3.6.2: CPPFLAGS="-I${TMP}/install/include" LDFLAGS="-L${TMP}/install/lib -Wl,-rpath,${TMP}/install/lib"
+Python-3.6.2: --prefix=$INSTALL_ROOT --enable-shared --libdir=$INSTALL_ROOT/lib
 make -j 2
 make install
 OUT
@@ -177,8 +177,8 @@ OUT
   assert_success
 
   assert_build_log <<OUT
-Python-3.6.2: CPPFLAGS="-I${TMP}/install/include " LDFLAGS="-L${TMP}/install/lib "
-Python-3.6.2: --prefix=$INSTALL_ROOT --libdir=$INSTALL_ROOT/lib
+Python-3.6.2: CPPFLAGS="-I${TMP}/install/include" LDFLAGS="-L${TMP}/install/lib -Wl,-rpath,${TMP}/install/lib"
+Python-3.6.2: --prefix=$INSTALL_ROOT --enable-shared --libdir=$INSTALL_ROOT/lib
 make -j 2
 make altinstall
 OUT
@@ -245,25 +245,27 @@ OUT
 }
 
 @test "enable framework" {
-  mkdir -p "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin"
-  touch "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3"
-  chmod +x "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3"
-  touch "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3.4"
-  chmod +x "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3.4"
-  touch "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3-config"
-  chmod +x "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3-config"
-  touch "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3.4-config"
-  chmod +x "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python3.4-config"
+  framework_path="${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin"
+  mkdir -p "$framework_path"
+  for executable in python3{,.4}{,-config}; do 
+    touch "$framework_path/$executable"
+    chmod +x "$framework_path/$executable"
+  done
+  unset framework_path executable
 
   for i in {1..3}; do stub uname '-s : echo Darwin'; done
 
   PYTHON_CONFIGURE_OPTS="--enable-framework" TMPDIR="$TMP" run_inline_definition <<OUT
 echo "PYTHON_CONFIGURE_OPTS_ARRAY=(\${PYTHON_CONFIGURE_OPTS_ARRAY[@]})"
+echo "PYTHON_CONFIGURE_OPTS=(\${PYTHON_CONFIGURE_OPTS})"
+echo "CONFIGURE_OPTS=(\${CONFIGURE_OPTS})"
 verify_python python3.4
 OUT
   assert_success
   assert_output <<EOS
 PYTHON_CONFIGURE_OPTS_ARRAY=(--libdir=${TMP}/install/lib --enable-framework=${TMP}/install/Library/Frameworks)
+PYTHON_CONFIGURE_OPTS=()
+CONFIGURE_OPTS=()
 EOS
 
   [ -L "${INSTALL_ROOT}/Library/Frameworks/Python.framework/Versions/Current/bin/python" ]
@@ -277,10 +279,14 @@ EOS
 
   PYTHON_CONFIGURE_OPTS="--enable-universalsdk" TMPDIR="$TMP" run_inline_definition <<OUT
 echo "PYTHON_CONFIGURE_OPTS_ARRAY=(\${PYTHON_CONFIGURE_OPTS_ARRAY[@]})"
+echo "PYTHON_CONFIGURE_OPTS=(\${PYTHON_CONFIGURE_OPTS})"
+echo "CONFIGURE_OPTS=(\${CONFIGURE_OPTS})"
 OUT
   assert_success
   assert_output <<EOS
-PYTHON_CONFIGURE_OPTS_ARRAY=(--libdir=${TMP}/install/lib --enable-universalsdk=/)
+PYTHON_CONFIGURE_OPTS_ARRAY=(--enable-shared --libdir=${TMP}/install/lib --enable-universalsdk=/)
+PYTHON_CONFIGURE_OPTS=()
+CONFIGURE_OPTS=()
 EOS
 }
 
@@ -291,10 +297,14 @@ EOS
 
   PYTHON_CONFIGURE_OPTS="--enable-universalsdk" TMPDIR="$TMP" run_inline_definition <<OUT
 echo "PYTHON_CONFIGURE_OPTS_ARRAY=(\${PYTHON_CONFIGURE_OPTS_ARRAY[@]})"
+echo "PYTHON_CONFIGURE_OPTS=(\${PYTHON_CONFIGURE_OPTS})"
+echo "CONFIGURE_OPTS=(\${CONFIGURE_OPTS})"
 OUT
   assert_success
   assert_output <<EOS
-PYTHON_CONFIGURE_OPTS_ARRAY=(--libdir=${TMP}/install/lib --enable-universalsdk=/ --with-universal-archs=universal2)
+PYTHON_CONFIGURE_OPTS_ARRAY=(--enable-shared --libdir=${TMP}/install/lib --enable-universalsdk=/ --with-universal-archs=universal2)
+PYTHON_CONFIGURE_OPTS=()
+CONFIGURE_OPTS=()
 EOS
 }
 
@@ -307,7 +317,7 @@ echo "PYTHON_CONFIGURE_OPTS_ARRAY=(\${PYTHON_CONFIGURE_OPTS_ARRAY[@]})"
 OUT
   assert_success
   assert_output <<EOS
-PYTHON_CONFIGURE_OPTS_ARRAY=(--libdir=${TMP}/install/lib --enable-universalsdk=/)
+PYTHON_CONFIGURE_OPTS_ARRAY=(--enable-shared --libdir=${TMP}/install/lib --enable-universalsdk=/)
 EOS
 }
 
@@ -324,8 +334,8 @@ EOS
   assert_success
 
   assert_build_log <<OUT
-Python-3.6.2: CPPFLAGS="-I${TMP}/install/include " LDFLAGS="-L${TMP}/install/lib "
-Python-3.6.2: --prefix=$INSTALL_ROOT --enable-unicode=ucs2 --libdir=$INSTALL_ROOT/lib
+Python-3.6.2: CPPFLAGS="-I${TMP}/install/include" LDFLAGS="-L${TMP}/install/lib -Wl,-rpath,${TMP}/install/lib"
+Python-3.6.2: --prefix=$INSTALL_ROOT --enable-shared --libdir=$INSTALL_ROOT/lib --enable-unicode=ucs2
 make -j 2
 make install
 OUT
@@ -336,10 +346,8 @@ OUT
 
 @test "default MACOSX_DEPLOYMENT_TARGET" {
   # yyuu/pyenv#257
-  stub uname '-s : echo Darwin'
-
-  stub uname '-s : echo Darwin'
-  stub sw_vers '-productVersion : echo 10.10'
+  for i in {1..3}; do stub uname '-s : echo Darwin'; done
+  for i in {1..2}; do stub sw_vers '-productVersion : echo 10.10'; done
 
   TMPDIR="$TMP" run_inline_definition <<OUT
 echo "\${MACOSX_DEPLOYMENT_TARGET}"

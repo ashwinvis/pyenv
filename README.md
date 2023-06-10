@@ -53,7 +53,7 @@ This project was forked from [rbenv](https://github.com/rbenv/rbenv) and
   * [Install Python build dependencies](#install-python-build-dependencies)
 * **[Usage](#usage)**
   * [Install additional Python versions](#install-additional-python-versions)
-    * [Prefix auto-resolution](#prefix-auto-resolution)
+    * [Prefix auto-resolution to the latest version](#prefix-auto-resolution-to-the-latest-version)
     * [Python versions with extended support](#python-versions-with-extended-support)
   * [Switch between Python versions](#switch-between-python-versions)
   * [Uninstall Python versions](#uninstall-python-versions)
@@ -62,6 +62,7 @@ This project was forked from [rbenv](https://github.com/rbenv/rbenv) and
   * [Upgrading with Homebrew](#upgrading-with-homebrew)
   * [Upgrading with Installer or Git checkout](#upgrading-with-installer-or-git-checkout)
 * [Uninstalling pyenv](#uninstalling-pyenv)
+* [Pyenv plugins](#pyenv-plugins)
 * [Advanced Configuration](#advanced-configuration)
   * [Using Pyenv without shims](#using-pyenv-without-shims)
   * [Environment variables](#environment-variables)
@@ -357,6 +358,11 @@ See [Advanced configuration](#advanced-configuration) for details and more confi
 
    **Proxy note**: If you use a proxy, export `http_proxy` and `https_proxy`, too.
 
+   In MacOS, you might also want to install [Fig](https://fig.io/) which
+provides alternative shell completions for many command line tools with an
+IDE-like popup interface in the terminal window.
+(Note that their completions are independent from Pyenv's codebase
+so they might be slightly out of sync for bleeding-edge interface changes.)
 
 ### Restart your shell
 
@@ -396,19 +402,22 @@ You can pass options to Python's `configure` and compiler flags to customize the
 see [_Special environment variables_ in Python-Build's README](plugins/python-build/README.md#special-environment-variables)
 for details.
 
-**NOTE:** If you want to use proxy for download, please set the `http_proxy` and `https_proxy`
-environment variables.
-
 **NOTE:** If you are having trouble installing a Python version,
 please visit the wiki page about
 [Common Build Problems](https://github.com/pyenv/pyenv/wiki/Common-build-problems).
 
+**NOTE:** If you want to use proxy for download, please set the `http_proxy` and `https_proxy`
+environment variables.
 
-#### Prefix auto-resolution
+**NOTE:** If you'd like a faster interpreter at the cost of longer build times,
+see [_Building for maximum performance_ in Python-Build's README](plugins/python-build/README.md#building-for-maximum-performance).
+
+
+#### Prefix auto-resolution to the latest version
 
 All Pyenv subcommands except `uninstall` automatically resolve full prefixes to the latest version in the corresponding version line.
 
-`pyenv install` picks the latest known version while other subcommands -- the latest installed version.
+`pyenv install` picks the latest known version, while other subcommands pick the latest installed version.
 
 E.g. to install and then switch to the latest 3.10 release:
 
@@ -417,8 +426,7 @@ pyenv install 3.10
 pyenv global 3.10
 ```
 
-You can run [`pyenv latest <prefix>`](COMMANDS.md#pyenv-latest) to see
-what a specific prefix would be resolved to.
+You can run [`pyenv latest -k <prefix>`](COMMANDS.md#pyenv-latest) to see how `pyenv install` would resolve a specific prefix, or [`pyenv latest <prefix>`](COMMANDS.md#pyenv-latest) to see how other subcommands would resolve it.
 
 See the [`pyenv latest` documentation](COMMANDS.md#pyenv-latest) for details.
 
@@ -431,7 +439,7 @@ it's safe to assume that they will continue working until there are further inco
 in a later version of those environments.
 
 * *3.7.8-3.7.15, 3.8.4-3.8.12, 3.9.0-3.9.7* : XCode 13.3
-* *3.6.15* : MacOS 11+ and XCode 13.3
+* *3.5.10, 3.6.15* : MacOS 11+ and XCode 13.3
 * *2.7.18* : MacOS 10.15+ and Apple Silicon
 
 
@@ -560,6 +568,19 @@ uninstall from the system.
     brew uninstall pyenv
     ```
 
+
+## Pyenv plugins
+
+Pyenv provides a simple, flexible and maintainable way to extend and customize its functionalty with plugins --
+as simple as creating a plugin directory and dropping a shell script on a certain subpath of it
+with whatever extra logic you need to be run at certain moments.
+
+See [_Plugins_ on the wiki](https://github.com/pyenv/pyenv/wiki/Plugins) on how to install and use plugins
+as well as a catalog of some useful existing plugins for common needs.
+
+See [_Authoring plugins_ on the wiki](https://github.com/pyenv/pyenv/wiki/Authoring-plugins) on writing your own plugins.
+
+
 ## Advanced Configuration
 
 Skip this section unless you must know what every line in your shell
@@ -651,7 +672,6 @@ See also [_Special environment variables_ in Python-Build's README](plugins/pyth
 for environment variables that can be used to customize the build.
 
 ----
-
 
 ## Development
 
