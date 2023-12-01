@@ -803,6 +803,7 @@ build_package_standard_build() {
     use_homebrew || true
     use_tcltk || true
     use_homebrew_readline || use_freebsd_pkg || true
+    use_homebrew_ncurses || true
     if is_mac -ge 1014; then
       use_xcode_sdk_zlib || use_homebrew_zlib || true
     else
@@ -1420,7 +1421,7 @@ use_freebsd_pkg() {
   # check if FreeBSD
   if [ "FreeBSD" = "$(uname -s)" ]; then
     # use openssl if installed from Ports Collection
-    if [ -f /usr/local/include/openssl/ssl.h ]; then
+    if pkg info -e openssl; then
       package_option python configure --with-openssl="/usr/local"
     fi
 
@@ -1468,9 +1469,27 @@ use_homebrew_readline() {
   fi
 }
 
+use_homebrew_ncurses() {
+  can_use_homebrew || return 1
+  local libdir="$(brew --prefix ncurses 2>/dev/null || true)"
+  if [ -d "$libdir" ]; then
+    echo "python-build: use ncurses from homebrew"
+    export CPPFLAGS="-I$libdir/include${CPPFLAGS:+ $CPPFLAGS}"
+    export LDFLAGS="-L$libdir/lib${LDFLAGS:+ $LDFLAGS}"
+  else
+    return 1
+  fi
+}
+
 prefer_openssl11() {
   # Allow overriding the preference of OpenSSL version per definition basis (#1302, #1325, #1326)
   PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="${PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA:-openssl@1.1 openssl}"
+  export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA
+}
+
+prefer_openssl3() {
+  # Allow overriding the preference of OpenSSL version per definition basis (#1302, #1325, #1326)
+  PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="${PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA:-openssl@3 openssl@1.1 openssl}"
   export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA
 }
 
@@ -1610,7 +1629,10 @@ use_xcode_sdk_zlib() {
   local xc_sdk_path="$(xcrun --show-sdk-path 2>/dev/null || true)"
   if [ -d "$xc_sdk_path" ]; then
     echo "python-build: use zlib from xcode sdk"
-    export CFLAGS="${CFLAGS:+$CFLAGS }-I${xc_sdk_path}/usr/include"
+    # Even though SDK's compiler uses the SDK dirs implicitly,
+    # CPython's setup.py has to have nonstandard paths specified explicitly
+    # to search for zlib.h in them
+    export CPPFLAGS="${CPPFLAGS:+$CPPFLAGS }-I${xc_sdk_path}/usr/include"
     if is_mac -ge 1100; then
       export LDFLAGS="${LDFLAGS:+$LDFLAGS }-L${xc_sdk_path}/usr/lib"
     fi
@@ -1626,7 +1648,15 @@ use_homebrew_tcltk() {
     if [[ -z "$PYTHON_BUILD_TCLTK_USE_PKGCONFIG" ]]; then
       local tcltk_version="$(sh -c '. '"$tcltk_libdir"'/lib/tclConfig.sh; echo $TCL_VERSION')"
       package_option python configure --with-tcltk-libs="-L$tcltk_libdir/lib -ltcl$tcltk_version -ltk$tcltk_version"
-      package_option python configure --with-tcltk-includes="-I$tcltk_libdir/include"
+      # In Homebrew Tcl/Tk 8.6.13, headers have been moved to the 'tcl-tk' subdir.
+      # We're not using tclConfig.sh here 'cuz it produces the version-specific path to <brew prefix>/Cellar
+      # and we'd rather have rpath set to <brew prefix>/opt/<...> to allow micro release upgrades without rebuilding
+      # XXX: do use tclConfig.sh and translate the paths if more path shenanigans appear in later releases
+      if [ -d "$tcltk_libdir/include/tcl-tk" ]; then
+        package_option python configure --with-tcltk-includes="-I$tcltk_libdir/include/tcl-tk"
+      else
+        package_option python configure --with-tcltk-includes="-I$tcltk_libdir/include"
+      fi
     fi
     export PKG_CONFIG_PATH="${tcltk_libdir}/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
   fi
@@ -2018,14 +2048,23 @@ build_package_get_pip() {
   build_package_symlink_version_suffix
 }
 
+# Pip <21 (in 2.7 and derivatives like PyPy-2.7) doesn't support -I
+build_package_ensurepip_lt21() {
+  build_package_ensurepip lt21
+}
+
 build_package_ensurepip() {
+  local mode="$1"
   local ensurepip_opts
   # Install as `--altinstall` if the Python is installed as `altinstall` (#255)
   if [[ "$PYTHON_MAKE_INSTALL_TARGET" == *"altinstall"* ]]; then
     ensurepip_opts="--altinstall"
   fi
+  local python_opts="-I"
+  if [[ $mode == "lt21" ]]; then python_opts="-s"; fi
+  
   # FIXME: `--altinstall` with `get-pip.py`
-  "$PYTHON_BIN" -s -m ensurepip ${ensurepip_opts} 1>/dev/null 2>&1 || build_package_get_pip "$@" || return 1
+  "$PYTHON_BIN" $python_opts -m ensurepip ${ensurepip_opts} 1>/dev/null 2>&1 || build_package_get_pip "$@" || return 1
   build_package_symlink_version_suffix
 }
 
@@ -2331,7 +2370,7 @@ if [ -z "${GET_PIP_URL}" ]; then
     2.6 | 2.6.* )
       GET_PIP_URL="https://bootstrap.pypa.io/pip/2.6/get-pip.py"
       ;;
-    2.7 | 2.7.* )
+    2.7 | 2.7.* | pypy2.7 | pypy2.7-* )
       GET_PIP_URL="https://bootstrap.pypa.io/pip/2.7/get-pip.py"
       ;;
     3.2 | 3.2.* )
@@ -2343,10 +2382,10 @@ if [ -z "${GET_PIP_URL}" ]; then
     3.4 | 3.4.* )
       GET_PIP_URL="https://bootstrap.pypa.io/pip/3.4/get-pip.py"
       ;;
-    3.5 | 3.5.* )
+    3.5 | 3.5.* | pypy3.5 | pypy3.5-* )
       GET_PIP_URL="https://bootstrap.pypa.io/pip/3.5/get-pip.py"
       ;;
-    3.6 | 3.6.* )
+    3.6 | 3.6.* | pypy3.6 | pypy3.6-* )
       GET_PIP_URL="https://bootstrap.pypa.io/pip/3.6/get-pip.py"
       ;;
     * )

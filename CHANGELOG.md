@@ -1,5 +1,87 @@
 # Version History
 
+## Release v2.3.33
+* Add miniforge3-23.3.1-1 by @goerz in https://github.com/pyenv/pyenv/pull/2839
+* Add support for miniconda3-3.11-23.10.0-1 by @binbjz in https://github.com/pyenv/pyenv/pull/2843
+* Add support for miniconda3 23.10.0-1 with py3.10、py3.9、py3.8 by @binbjz in https://github.com/pyenv/pyenv/pull/2844
+* Add CPython 3.13.0a2 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2849
+* python-build: Document PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA and PYTHON_BUILD_HTTP_CLIENT by @native-api in https://github.com/pyenv/pyenv/pull/2853
+
+## Release v2.3.32
+* Describe --no-rehash option in the manpage by @fsc-eriker in https://github.com/pyenv/pyenv/pull/2832
+* Make adding $PYENV_ROOT/bin to PATH independent of other software by @native-api in https://github.com/pyenv/pyenv/pull/2837
+* Make `pyenv init` output insertable to startup files by @native-api in https://github.com/pyenv/pyenv/pull/2838
+
+## Release v2.3.31
+* Add new anaconda and miniconda definitions by @aphedges in https://github.com/pyenv/pyenv/pull/2824
+
+## Release v2.3.30
+
+* Fix intermittent "broken pipe" in tests by @native-api in https://github.com/pyenv/pyenv/pull/2817
+* Add CPython 3.13.0a1 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2818
+* Add PyPy 7.3.13 by @dand-oss in https://github.com/pyenv/pyenv/pull/2807
+* Fix linking against Homebrew's Tcl/Tk 8.6.13 in MacOS by @startergo in https://github.com/pyenv/pyenv/pull/2820
+
+## Release v2.3.29
+
+* Add CPython 3.11.6 by @thecesrom in https://github.com/pyenv/pyenv/pull/2806
+* Add GraalPy 23.1.0 definition using the faster Oracle GraalVM distribution by @eregon in https://github.com/pyenv/pyenv/pull/2812
+* Install ncurses from Homebrew, if available by @aphedges in https://github.com/pyenv/pyenv/pull/2813
+
+## Release v2.3.28
+
+* Prioritize 'zlib from xcode sdk' flag correctly by @native-api in https://github.com/pyenv/pyenv/pull/2791
+* Prefer OpenSSL 3 in Homebrew in 3.13-dev by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2793
+* Add CPython 3.12.0rc3 by @saaketp in https://github.com/pyenv/pyenv/pull/2795
+* Add graalpy-23.1.0 and split between graalpy and graalpy-community by @msimacek in https://github.com/pyenv/pyenv/pull/2796
+* Update the OpenSSL dependency for Python 2.7.18 by @lpapp-foundry in https://github.com/pyenv/pyenv/pull/2797
+* Add CPython 3.12.0 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2804
+
+## Release v2.3.27
+
+* Prefer OpenSSL 3 in Homebrew since 3.12 by @native-api in https://github.com/pyenv/pyenv/pull/2781
+* Fix get-pip urls for older pypy versions by @TimPansino in https://github.com/pyenv/pyenv/pull/2788
+* Update openssl url for 3.12.0rc2 by @zsol in https://github.com/pyenv/pyenv/pull/2789
+  
+## Release v2.3.26
+
+* Prevent `grep` warning in `conda.bash` by @aphedges in https://github.com/pyenv/pyenv/pull/2768
+* fix a typo in README.md by @xzmeng in https://github.com/pyenv/pyenv/pull/2769
+* use -I with ensurepip by @xaocon in https://github.com/pyenv/pyenv/pull/2764
+* Add CPython 3.12.0rc2 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2778
+
+## Release v2.3.25
+
+* Add CPython 3.8.18, 3.9.18, 3.10.13, 3.11.5 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2763
+ 
+## Release v2.3.24
+
+* README update: Added UNIX reference near Automatic installer by @VictorieeMan in https://github.com/pyenv/pyenv/pull/2744
+* Fix FreeBSD tests in MacOS CI by @native-api in https://github.com/pyenv/pyenv/pull/2748
+* Add CPython 3.12.0rc1 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2752
+* [Add an updated Anaconda and Miniconda installers](https://github.com/pyenv/pyenv/commit/db871427c7a232e18ee7a6dc0182989a646ccca9)
+
+## Release v2.3.23
+
+* Add CPython 3.12.0b4 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2741
+* Add new anaconda and miniconda definitions by @aphedges in https://github.com/pyenv/pyenv/pull/2742
+
+## Release v2.3.22
+
+* Add CPython 3.12.0b3 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2730
+* Add Cinder 3.10 and Cinder configure patches by @filips123 in https://github.com/pyenv/pyenv/pull/2739
+
+## Release v2.3.21
+
+* Add graalpy-23.0.0 by @msimacek in https://github.com/pyenv/pyenv/pull/2724
+* Add PyPy 7.3.12 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2726
+* Fix occasional 'libexec/pyenv-latest: line 39: printf: write error: Broken pipe' by @native-api in https://github.com/pyenv/pyenv/pull/2729
+
+## Release v2.3.20
+
+* Backport bpo-42351 to 3.5.10 by @native-api in https://github.com/pyenv/pyenv/pull/2717
+* Add missing patches for Python 3.7/3.8/3.9 by @tomkins in https://github.com/pyenv/pyenv/pull/2718
+
 ## Release v2.3.19
 
 * Add CPython 3.7.17, 3.8.17 and 3.9.17 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2711

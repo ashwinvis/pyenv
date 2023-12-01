@@ -44,10 +44,11 @@ This project was forked from [rbenv](https://github.com/rbenv/rbenv) and
   * [Locating Pyenv-provided Python Installations](#locating-pyenv-provided-python-installations)
 * **[Installation](#installation)**
   * [Getting Pyenv](#getting-pyenv)
-    * [Homebrew in macOS](#homebrew-in-macos)
+    * [UNIX/MacOS](#unixmacos)
+      * [Homebrew in macOS](#homebrew-in-macos)
+      * [Automatic installer](#automatic-installer)
+      * [Basic GitHub Checkout](#basic-github-checkout)
     * [Windows](#windows)
-    * [Automatic installer](#automatic-installer)
-    * [Basic GitHub Checkout](#basic-github-checkout)
   * [Set up your shell environment for Pyenv](#set-up-your-shell-environment-for-pyenv)
   * [Restart your shell](#restart-your-shell)
   * [Install Python build dependencies](#install-python-build-dependencies)
@@ -200,7 +201,8 @@ As far as Pyenv is concerned, version names are simply directories under
 ## Installation
 
 ### Getting Pyenv
-#### Homebrew in macOS
+#### UNIX/MacOS
+##### Homebrew in macOS
 
    1. Consider installing with [Homebrew](https://brew.sh):
       ```sh
@@ -234,19 +236,7 @@ As far as Pyenv is concerned, version names are simply directories under
         ~~~
 
 
-#### Windows
-
-Pyenv does not officially support Windows and does not work in Windows outside
-the Windows Subsystem for Linux.
-Moreover, even there, the Pythons it installs are not native Windows versions
-but rather Linux versions running in a virtual machine --
-so you won't get Windows-specific functionality.
-
-If you're in Windows, we recommend using @kirankotari's [`pyenv-win`](https://github.com/pyenv-win/pyenv-win) fork --
-which does install native Windows Python versions.
-
-
-#### Automatic installer
+##### Automatic installer
 
 `curl https://pyenv.run | bash`
 
@@ -254,7 +244,7 @@ For more details visit our other project:
 https://github.com/pyenv/pyenv-installer
 
 
-#### Basic GitHub Checkout
+##### Basic GitHub Checkout
 
 This will get you going with the latest version of Pyenv and make it
 easy to fork and contribute any changes back upstream.
@@ -269,6 +259,18 @@ easy to fork and contribute any changes back upstream.
     ```
     cd ~/.pyenv && src/configure && make -C src
     ```
+
+#### Windows
+
+Pyenv does not officially support Windows and does not work in Windows outside
+the Windows Subsystem for Linux.
+Moreover, even there, the Pythons it installs are not native Windows versions
+but rather Linux versions running in a virtual machine --
+so you won't get Windows-specific functionality.
+
+If you're in Windows, we recommend using @kirankotari's [`pyenv-win`](https://github.com/pyenv-win/pyenv-win) fork --
+which does install native Windows Python versions.
+
 
 ### Set up your shell environment for Pyenv
 
@@ -315,14 +317,14 @@ See [Advanced configuration](#advanced-configuration) for details and more confi
     * to add to `~/.bash_profile`:
       ~~~ bash
       echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
-      echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+      echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
       echo 'eval "$(pyenv init -)"' >> ~/.bash_profile
       ~~~
 
   - For **Zsh**:
     ~~~ zsh
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+    echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
     echo 'eval "$(pyenv init -)"' >> ~/.zshrc
     ~~~
 
@@ -571,7 +573,7 @@ uninstall from the system.
 
 ## Pyenv plugins
 
-Pyenv provides a simple, flexible and maintainable way to extend and customize its functionalty with plugins --
+Pyenv provides a simple, flexible and maintainable way to extend and customize its functionality with plugins --
 as simple as creating a plugin directory and dropping a shell script on a certain subpath of it
 with whatever extra logic you need to be run at certain moments.
 
