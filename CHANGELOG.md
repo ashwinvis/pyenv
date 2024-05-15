@@ -1,5 +1,51 @@
 # Version History
 
+## Release v2.4.1
+* Add CPython 3.12.3 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2941
+* Add CPython 3.13.0a6 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2942
+* Add PyPy v7.3.16 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2948
+* Add CPython 3.14-dev, update 3.13-dev by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2960
+* Add CPython 3.13.0b1 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2959
+
+## Release v2.4.0
+* Add CPython 3.13.0a4 by @saaketp in https://github.com/pyenv/pyenv/pull/2903
+* Handle the case where `pyenv-commands --sh` returns nothing by @aphedges in https://github.com/pyenv/pyenv/pull/2908
+* Document default build configuration customizations by @native-api in https://github.com/pyenv/pyenv/pull/2911
+* Use Homebrew in Linux if Pyenv is installled with Homebrew by @native-api in https://github.com/pyenv/pyenv/pull/2906
+* Add miniforge and mambaforge 22.11.1-3, 22.11.1-4, 23.1.0-0 to 23.11.0-0 by @aphedges in https://github.com/pyenv/pyenv/pull/2909
+* Add miniconda3-24.1.2 by @binbjz in https://github.com/pyenv/pyenv/pull/2915
+* Minor grammar fix in libffi backport patch in 2.5.x by @cuinix in https://github.com/pyenv/pyenv/pull/2922
+* Add CPython 3.13.0a5 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2924
+* Add CPython 3.8.19 and 3.9.19 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2929
+* Add GraalPy 24.0.0 by @msimacek in https://github.com/pyenv/pyenv/pull/2928
+* Add CPython 3.10.14 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2930
+* Add Jython 2.7.3 by @cesarcoatl in https://github.com/pyenv/pyenv/pull/2936
+* Add CPython 3.11.9 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2938
+* Add anaconda 2024.02 by @native-api in https://github.com/pyenv/pyenv/pull/2939
+
+## Release v2.3.36
+* Add a Dependabot config to auto-update GitHub action versions by @kurtmckee in https://github.com/pyenv/pyenv/pull/2863
+* Bump the github-actions group with 1 update by @dependabot in https://github.com/pyenv/pyenv/pull/2864
+* Add installation prefix to `python-config --ldflags` output by @mhaeuser in https://github.com/pyenv/pyenv/pull/2865
+* Add support for miniconda3 23.11.0-1, 23.11.0-2 with py3.11, py3.10, py3.9, py3.8 by @binbjz in https://github.com/pyenv/pyenv/pull/2870
+* Add micropython 1.20.0 and 1.21.0 by @cpzt in https://github.com/pyenv/pyenv/pull/2869
+* Make "Automatic installer" command in the README a copy-able code block by @ryan-williams in https://github.com/pyenv/pyenv/pull/2874
+* Add PyPy 7.3.14 by @dand-oss in https://github.com/pyenv/pyenv/pull/2876
+* Add graalpy-23.1.2 by @msimacek in https://github.com/pyenv/pyenv/pull/2884
+* Add CPython 3.13.0a3 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2885
+* Add PyPy v7.3.15 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2886
+* Update pypy3.9-7.3.13 checksums by @ecerulm in https://github.com/pyenv/pyenv/pull/2887
+* Add CPython 3.12.2 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2899
+* Add CPython 3.11.8 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2898
+
+## Release v2.3.35
+* Add CPython 3.12.1 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2861
+
+## Release v2.3.34
+* Fix graalpy-community to use a separate package name by @native-api in https://github.com/pyenv/pyenv/pull/2855
+* Move 3.11.5+ to OpenSSL 3 by default by @native-api in https://github.com/pyenv/pyenv/pull/2858
+* Add CPython 3.11.7 by @edgarrmondragon in https://github.com/pyenv/pyenv/pull/2860
+
 ## Release v2.3.33
 * Add miniforge3-23.3.1-1 by @goerz in https://github.com/pyenv/pyenv/pull/2839
 * Add support for miniconda3-3.11-23.10.0-1 by @binbjz in https://github.com/pyenv/pyenv/pull/2843

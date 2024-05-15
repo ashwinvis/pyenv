@@ -19,7 +19,10 @@ PYTHON_BUILD_VERSION="20180424"
 OLDIFS="$IFS"
 
 set -E
-[ -n "$PYENV_DEBUG" ] && set -x
+[ -n "$PYENV_DEBUG" ] && {
+  export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+  set -x
+}
 
 exec 3<&2 # preserve original stderr at fd 3
 
@@ -118,8 +121,17 @@ is_mac() {
 }
 
 can_use_homebrew() {
-    [ -z "$PYTHON_BUILD_SKIP_HOMEBREW" ] || return 1
-    is_mac || return 1
+  [[ -n "$PYTHON_BUILD_USE_HOMEBREW" && -n "$PYTHON_BUILD_SKIP_HOMEBREW" ]] && {
+    echo "error: mutually exclusive environment variables PYTHON_BUILD_USE_HOMEBREW and PYTHON_BUILD_SKIP_HOMEBREW are set" >&3
+    exit 1
+  }
+  [[ -n "$PYTHON_BUILD_USE_HOMEBREW" ]] && return 0
+  [[ -n "$PYTHON_BUILD_SKIP_HOMEBREW" ]] && return 1
+  is_mac && return 0
+  # In Linux, if Pyenv itself is installed with Homebrew,
+  # we assume the user wants to take dependencies from there as well by default
+  command -v brew &>/dev/null && [[ $(abs_dirname "${BASH_SOURCE}") == "$(abs_dirname "$(brew --prefix 2>/dev/null ||true)")"/* ]] && return 0
+  return 1
 }
 
 #  9.1  -> 901
@@ -925,7 +937,13 @@ build_package_ironpython_builder() {
   ( cd "Stage/Release/IronPython-"* && build_package_ironpython )
 }
 
+build_package_micropython_1_9() {
+  # supported version 1.9.3 and 1.9.4
+  build_package_micropython "with_axtls"
+}
+
 build_package_micropython() {
+  # supported version 1.10 and higher
   if [ "${MAKEOPTS+defined}" ]; then
     MAKE_OPTS="$MAKEOPTS"
   elif [ -z "${MAKE_OPTS+defined}" ]; then
@@ -934,7 +952,7 @@ build_package_micropython() {
   { cd mpy-cross
     "$MAKE" $MAKE_OPTS
     cd ../ports/unix
-    "$MAKE" $MAKE_OPTS axtls
+    [ "$1" = "with_axtls" ] && "$MAKE" $MAKE_OPTS axtls
     "$MAKE" $MAKE_OPTS CFLAGS_EXTRA="-DMICROPY_PY_SYS_PATH_DEFAULT='\".frozen:${PREFIX_PATH}/lib/micropython\"' $CFLAGS_EXTRA"
     "$MAKE" install $MAKE_INSTALL_OPTS PREFIX="${PREFIX_PATH}"
     ln -fs micropython "${PREFIX_PATH}/bin/python"
@@ -1383,6 +1401,19 @@ configured_with_package_dir() {
   return 1
 }
 
+# `python-config` ignores LDFLAGS envvar. Adding to LIBS is the only way to add extra stuff
+# to `python-config --ldflags` output
+append_ldflags_libs() {
+  local args="$1"
+  export LDFLAGS="${LDFLAGS:+$LDFLAGS }$args"
+  export LIBS="${LIBS:+${LIBS% } }$args"
+}
+prepend_ldflags_libs() {
+  local args="$1"
+  export LDFLAGS="$args${LDFLAGS:+ $LDFLAGS}"
+  export LIBS="$args${LIBS:+ $LIBS}"
+}
+
 use_homebrew() {
   can_use_homebrew || return 1
   # unless Homebrew is at the default /usr/local, need to add its paths to
@@ -1392,10 +1423,7 @@ use_homebrew() {
     # /usr/local/lib:/usr/lib is the default library search path
     if [[ -n $brew_prefix && $brew_prefix != "/usr" && $brew_prefix != "/usr/local" ]]; then
       export CPPFLAGS="${CPPFLAGS:+$CPPFLAGS }-I${brew_prefix}/include"
-      export LDFLAGS="${LDFLAGS:+$LDFLAGS }-L${brew_prefix}/lib -Wl,-rpath,${brew_prefix}/lib"
-      # `python-config` ignores LDFLAGS envvar. Adding to LIBS is the only way to add extra stuff
-      # to `python-config --ldflags` output
-      export LIBS="${LIBS:+${LIBS% } }-L${brew_prefix}/lib -Wl,-rpath,${brew_prefix}/lib"
+      append_ldflags_libs "-L${brew_prefix}/lib -Wl,-rpath,${brew_prefix}/lib"
     fi
   fi
 }
@@ -1993,6 +2021,11 @@ build_package_verify_py313() {
   build_package_verify_py312 "$1" "${2:-3.13}"
 }
 
+# Post-install check for Python 3.14.x
+build_package_verify_py314() {
+  build_package_verify_py313 "$1" "${2:-3.13}"
+}
+
 # Post-install check for Python 3.x rolling release scripts
 # XXX: Will need splitting into project-specific ones if there emerge
 # multiple rolling-release scripts with different checks needed
@@ -2258,13 +2291,13 @@ package_option python configure --libdir="${PREFIX_PATH}/lib"
 if [[ "$CONFIGURE_OPTS $PYTHON_CONFIGURE_OPTS ${PYTHON_CONFIGURE_OPTS_ARRAY[@]}" == *"--enable-shared"* ]]; then
   # The ld on Darwin embeds the full paths to each dylib by default
   if [[ "$LDFLAGS" != *"-rpath="* ]] ; then
-    export LDFLAGS="-Wl,-rpath,${PREFIX_PATH}/lib${LDFLAGS:+ $LDFLAGS}"
+    prepend_ldflags_libs "-Wl,-rpath,${PREFIX_PATH}/lib"
   fi
 fi
 
 # python-build: Set `RPATH` if --shared` was given for PyPy (#244)
 if [[ "$PYPY_OPTS" == *"--shared"* ]]; then
-  export LDFLAGS="-Wl,-rpath=${PREFIX_PATH}/lib${LDFLAGS:+ $LDFLAGS}"
+  prepend_ldflags_libs "-Wl,-rpath=${PREFIX_PATH}/lib"
 fi
 
 # Add support for framework installation (`--enable-framework`) of CPython (#55, #99)
@@ -2446,7 +2479,7 @@ if [ -n "$VERBOSE" ]; then
   trap "kill $TAIL_PID" SIGINT SIGTERM EXIT
 fi
 
-export LDFLAGS="-L${PREFIX_PATH}/lib${LDFLAGS:+ $LDFLAGS}"
+prepend_ldflags_libs "-L${PREFIX_PATH}/lib"
 export CPPFLAGS="-I${PREFIX_PATH}/include${CPPFLAGS:+ $CPPFLAGS}"
 
 unset PYTHONHOME
