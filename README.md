@@ -86,7 +86,7 @@ to the correct Python installation.
 
 ### Understanding PATH
 
-When you run a command like `python` or `pip`, your operating system
+When you run a command like `python` or `pip`, your shell (bash / zshrc / ...)
 searches through a list of directories to find an executable file with
 that name. This list of directories lives in an environment variable
 called `PATH`, with each directory in the list separated by a colon:
@@ -209,10 +209,15 @@ As far as Pyenv is concerned, version names are simply directories under
       brew update
       brew install pyenv
       ```
-   2. Then follow the rest of the post-installation steps, starting with
+      If you want to install (and update to) the latest development head of Pyenv
+      rather than the latest release, instead run:
+      ```sh
+      brew install pyenv --head
+      ```
+   3. Then follow the rest of the post-installation steps, starting with
       [Set up your shell environment for Pyenv](#set-up-your-shell-environment-for-pyenv).
 
-   3. OPTIONAL. To fix `brew doctor`'s warning _""config" scripts exist outside your system or Homebrew directories"_
+   4. OPTIONAL. To fix `brew doctor`'s warning _""config" scripts exist outside your system or Homebrew directories"_
 
       If you're going to build Homebrew formulae from source that link against Python
       like Tkinter or NumPy
@@ -238,7 +243,9 @@ As far as Pyenv is concerned, version names are simply directories under
 
 ##### Automatic installer
 
-`curl https://pyenv.run | bash`
+```bash
+curl https://pyenv.run | bash
+```
 
 For more details visit our other project:
 https://github.com/pyenv/pyenv-installer
@@ -322,6 +329,8 @@ See [Advanced configuration](#advanced-configuration) for details and more confi
       ~~~
 
   - For **Zsh**:
+  
+    Run the following to add the commands to `~/.zshrc`:
     ~~~ zsh
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
     echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
@@ -359,12 +368,6 @@ See [Advanced configuration](#advanced-configuration) for details and more confi
    See [#264](https://github.com/pyenv/pyenv/issues/264) for details.
 
    **Proxy note**: If you use a proxy, export `http_proxy` and `https_proxy`, too.
-
-   In MacOS, you might also want to install [Fig](https://fig.io/) which
-provides alternative shell completions for many command line tools with an
-IDE-like popup interface in the terminal window.
-(Note that their completions are independent from Pyenv's codebase
-so they might be slightly out of sync for bleeding-edge interface changes.)
 
 ### Restart your shell
 
@@ -502,7 +505,7 @@ If you've installed Pyenv using Homebrew, upgrade using:
 brew upgrade pyenv
 ```
 
-To switch from a release to the latest development version of Pyenv, use:
+To switch from a release to the latest development head of Pyenv, use:
 
 ```sh
 brew uninstall pyenv
@@ -573,9 +576,12 @@ uninstall from the system.
 
 ## Pyenv plugins
 
-Pyenv provides a simple, flexible and maintainable way to extend and customize its functionality with plugins --
+Pyenv provides a simple way to extend and customize its functionality with plugins --
 as simple as creating a plugin directory and dropping a shell script on a certain subpath of it
 with whatever extra logic you need to be run at certain moments.
+
+The main idea is that most things that you can put under `$PYENV_ROOT/<whatever>` you can also put
+under `$PYENV_ROOT/plugins/your_plugin_name/<whatever>`.
 
 See [_Plugins_ on the wiki](https://github.com/pyenv/pyenv/wiki/Plugins) on how to install and use plugins
 as well as a catalog of some useful existing plugins for common needs.
@@ -668,7 +674,6 @@ name | default | description
 `PYENV_DEBUG` | | Outputs debug information.<br>Also as: `pyenv --debug <subcommand>`
 `PYENV_HOOK_PATH` | [_see wiki_][hooks] | Colon-separated list of paths searched for pyenv hooks.
 `PYENV_DIR` | `$PWD` | Directory to start searching for `.python-version` files.
-`PYTHON_BUILD_ARIA2_OPTS` | | Used to pass additional parameters to [`aria2`](https://aria2.github.io/).<br>If the `aria2c` binary is available on `PATH`, pyenv uses `aria2c` instead of `curl` or `wget` to download the Python Source code. If you have an unstable internet connection, you can use this variable to instruct `aria2` to accelerate the download.<br>In most cases, you will only need to use `-x 10 -k 1M` as value to `PYTHON_BUILD_ARIA2_OPTS` environment variable
 
 See also [_Special environment variables_ in Python-Build's README](plugins/python-build/README.md#special-environment-variables)
 for environment variables that can be used to customize the build.
